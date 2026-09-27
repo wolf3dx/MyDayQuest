@@ -23,6 +23,7 @@ public static class MauiProgram
 		// Данные (путь к БД задаёт MAUI-голова)
 		builder.Services.AddSingleton(new AppDatabase(FileSystem.AppDataDirectory));
 		builder.Services.AddSingleton<SyncService>();
+		builder.Services.AddSingleton<UpdateService>();
 
 		// ViewModels
 		builder.Services.AddSingleton<MainViewModel>();

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -13,6 +14,8 @@ public partial class MainViewModel : ObservableObject
 {
     private readonly AppDatabase _db;
     private readonly SyncService _sync;
+    private readonly UpdateService _update;
+    private UpdateInfo? _pendingUpdate;
 
     private static readonly string[] Palette =
     {
@@ -25,10 +28,65 @@ public partial class MainViewModel : ObservableObject
     public Func<string, Task>? Alert;
     public Func<int, Task>? OpenTaskDetail;
 
-    public MainViewModel(AppDatabase db, SyncService sync)
+    public MainViewModel(AppDatabase db, SyncService sync, UpdateService update)
     {
         _db = db;
         _sync = sync;
+        _update = update;
+    }
+
+    // Взаимодействия для обновления (устанавливает View).
+    public Func<string, string, Task<bool>>? ConfirmUpdate;
+    public Func<string, Task>? OpenUrl;
+
+    /// <summary>Проверить GitLab Releases на новую версию.</summary>
+    public async Task CheckUpdateAsync()
+    {
+        _pendingUpdate = await _update.CheckAsync(AppVersion.Current);
+        IsUpdateAvailable = _pendingUpdate is not null;
+    }
+
+    /// <summary>Клик по иконке обновления — скачать и применить (Linux) либо открыть релиз.</summary>
+    public async Task UpdateAppAsync()
+    {
+        if (_pendingUpdate is null) return;
+        var up = _pendingUpdate;
+        if (ConfirmUpdate is not null && !await ConfirmUpdate("Обновление", $"Доступна версия {up.Version}. Обновить сейчас?"))
+            return;
+
+        try
+        {
+            if (OperatingSystem.IsLinux())
+                await ApplyLinuxAsync(up);
+            else if (OpenUrl is not null)
+                await OpenUrl(up.ReleaseUrl); // Windows/macOS Avalonia: открыть страницу релиза
+        }
+        catch (Exception ex)
+        {
+            if (Alert is not null) await Alert("Ошибка обновления: " + ex.Message);
+        }
+    }
+
+    private async Task ApplyLinuxAsync(UpdateInfo up)
+    {
+        var url = UpdateService.RawAssetUrl(up.Tag, "MyDayQuest-linux-x64.tar.gz");
+        var tmp = Path.Combine(Path.GetTempPath(), "mdq_update");
+        Directory.CreateDirectory(tmp);
+        var tar = Path.Combine(tmp, "update.tar.gz");
+        await UpdateService.DownloadAsync(url, tar);
+
+        var appDir = AppContext.BaseDirectory.TrimEnd('/');
+        var exe = Path.Combine(appDir, "MyDayQuest.Avalonia");
+        var sh = Path.Combine(tmp, "apply-update.sh");
+        await File.WriteAllTextAsync(sh,
+            "#!/bin/sh\n" +
+            "sleep 2\n" +
+            $"tar -xzf '{tar}' -C '{appDir}'\n" +
+            $"chmod +x '{exe}'\n" +
+            $"'{exe}' &\n");
+        var psi = new System.Diagnostics.ProcessStartInfo { FileName = "/bin/sh", ArgumentList = { sh }, UseShellExecute = false };
+        System.Diagnostics.Process.Start(psi);
+        Environment.Exit(0);
     }
 
     public ObservableCollection<QuestTabVM> Tabs { get; } = new();

@@ -27,7 +27,7 @@ public partial class App : Application
 
             var db = new AppDatabase(appFolder);
             var sync = new SyncService(db);
-            var vm = new MainViewModel(db, sync);
+            var vm = new MainViewModel(db, sync, new UpdateService());
 
             desktop.MainWindow = new MainWindow(vm, db, appFolder);
         }

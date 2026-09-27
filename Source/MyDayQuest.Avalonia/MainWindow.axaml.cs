@@ -27,9 +27,15 @@ public partial class MainWindow : Window
         _vm.PromptText = (t, p) => Dialogs.PromptAsync(this, t, p);
         _vm.Confirm = (t, m) => Dialogs.ConfirmAsync(this, t, m);
         _vm.Alert = m => Dialogs.AlertAsync(this, "My Day Quest", m);
+        _vm.ConfirmUpdate = (t, m) => Dialogs.ConfirmAsync(this, t, m);
+        _vm.OpenUrl = async u => { var tl = GetTopLevel(this); if (tl is not null) await tl.Launcher.LaunchUriAsync(new System.Uri(u)); };
         _vm.OpenTaskDetail = OpenTaskDetailAsync;
 
-        Opened += async (_, _) => await _vm.LoadAsync();
+        Opened += async (_, _) =>
+        {
+            await _vm.LoadAsync();
+            _ = _vm.CheckUpdateAsync(); // проверка обновления в фоне
+        };
     }
 
     private async Task OpenTaskDetailAsync(int taskId)
@@ -81,7 +87,7 @@ public partial class MainWindow : Window
             "My Day Quest (M.D.Q)\n\nПланировщик целей: листы → задания → подзадания, единый дневной план.\n\nАвтор: Виталий Коновалов. Версия 0.1.0.");
 
     private async void OnUpdateClick(object? sender, PointerPressedEventArgs e)
-        => await Dialogs.AlertAsync(this, "Обновление", "Здесь будет обновление из GitLab (заглушка).");
+        => await _vm.UpdateAppAsync();
 
     private static readonly FilePickerFileType MdqType = new("MyDayQuest (.mdq)") { Patterns = new[] { "*.mdq" } };
 

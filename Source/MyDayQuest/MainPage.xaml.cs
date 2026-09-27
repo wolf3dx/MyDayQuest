@@ -18,6 +18,7 @@ public partial class MainPage : ContentPage
         base.OnAppearing();
         await _vm.LoadAsync();
         await _vm.RefreshOpenListAsync();
+        _ = _vm.CheckUpdateAsync(); // проверка обновления в фоне (не блокируем UI)
     }
 
     private async void OnAboutClicked(object? sender, EventArgs e)

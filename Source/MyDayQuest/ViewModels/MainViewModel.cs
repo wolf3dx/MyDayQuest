@@ -13,6 +13,8 @@ public partial class MainViewModel : ObservableObject
 {
     private readonly AppDatabase _db;
     private readonly SyncService _sync;
+    private readonly UpdateService _update;
+    private UpdateInfo? _pendingUpdate;
 
     private const string SyncPathKey = "SyncFilePath";
     private const string SyncFileName = "MyDayQuest.mdq";
@@ -33,10 +35,11 @@ public partial class MainViewModel : ObservableObject
         "#EDEDED", "#DCE7F5", "#DDEFD9", "#F5E6D6", "#F0DDE9", "#E5E0F5", "#FDF3D0",
     };
 
-    public MainViewModel(AppDatabase db, SyncService sync)
+    public MainViewModel(AppDatabase db, SyncService sync, UpdateService update)
     {
         _db = db;
         _sync = sync;
+        _update = update;
     }
 
     /// <summary>Ленты листов внизу.</summary>
@@ -68,15 +71,80 @@ public partial class MainViewModel : ObservableObject
 
     /// <summary>Доступно ли обновление приложения. Иконка в шапке видна ТОЛЬКО когда true.</summary>
     [ObservableProperty]
-    private bool _isUpdateAvailable; // false по умолчанию; TODO Фаза 1: true по проверке GitLab Releases
+    private bool _isUpdateAvailable;
 
-    /// <summary>Клик по иконке обновления. Пока заглушка.</summary>
+    /// <summary>Проверить GitLab Releases на новую версию.</summary>
+    public async Task CheckUpdateAsync()
+    {
+        _pendingUpdate = await _update.CheckAsync(AppVersion.Current);
+        IsUpdateAvailable = _pendingUpdate is not null;
+    }
+
+    /// <summary>Клик по иконке обновления — скачать и применить (по платформе).</summary>
     [RelayCommand]
     private async Task UpdateAppAsync()
     {
-        // TODO Фаза 1: скачать релиз из GitLab и применить (по платформе).
-        await Shell.Current.DisplayAlertAsync("Обновление",
-            "Здесь будет обновление приложения до новой версии из GitLab (заглушка).", "OK");
+        if (_pendingUpdate is null) return;
+        var up = _pendingUpdate;
+
+        var ok = await Shell.Current.DisplayAlertAsync("Обновление",
+            $"Доступна версия {up.Version}. Обновить сейчас?", "Обновить", "Позже");
+        if (!ok) return;
+
+        try
+        {
+            var platform = DeviceInfo.Current.Platform;
+            if (platform == DevicePlatform.WinUI)
+                await ApplyWindowsUpdateAsync(up);
+            else if (platform == DevicePlatform.Android)
+                await ApplyAndroidUpdateAsync(up);
+            else
+                await Launcher.Default.OpenAsync(up.ReleaseUrl); // macOS/iOS: открыть страницу релиза
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlertAsync("Ошибка обновления", ex.Message, "OK");
+        }
+    }
+
+    private async Task ApplyWindowsUpdateAsync(UpdateInfo up)
+    {
+        var url = UpdateService.RawAssetUrl(up.Tag, "MyDayQuest-windows-x64.zip");
+        var tmp = Path.Combine(Path.GetTempPath(), "mdq_update");
+        Directory.CreateDirectory(tmp);
+        var zip = Path.Combine(tmp, "update.zip");
+        await UpdateService.DownloadAsync(url, zip);
+
+        var appDir = AppContext.BaseDirectory.TrimEnd('\\');
+        var exe = Path.Combine(appDir, "MyDayQuest.exe");
+        var bat = Path.Combine(tmp, "apply-update.bat");
+        File.WriteAllText(bat,
+            "@echo off\r\n" +
+            "timeout /t 2 /nobreak >nul\r\n" +
+            ":wait\r\n" +
+            "tasklist /fi \"imagename eq MyDayQuest.exe\" | find /i \"MyDayQuest.exe\" >nul && (timeout /t 1 /nobreak >nul & goto wait)\r\n" +
+            $"powershell -NoProfile -ExecutionPolicy Bypass -Command \"Expand-Archive -Force '{zip}' '{appDir}'\"\r\n" +
+            $"start \"\" \"{exe}\"\r\n");
+
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = bat,
+            UseShellExecute = true,
+            WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden,
+        });
+        Application.Current?.Quit();
+    }
+
+    private async Task ApplyAndroidUpdateAsync(UpdateInfo up)
+    {
+        var url = UpdateService.RawAssetUrl(up.Tag, "MyDayQuest-android.apk");
+        var apk = Path.Combine(FileSystem.CacheDirectory, "MyDayQuest-update.apk");
+        await UpdateService.DownloadAsync(url, apk);
+        // Открыть системный установщик APK (пользователь подтверждает установку).
+        await Launcher.Default.OpenAsync(new OpenFileRequest
+        {
+            File = new ReadOnlyFile(apk),
+        });
     }
 
     public async Task LoadAsync()
