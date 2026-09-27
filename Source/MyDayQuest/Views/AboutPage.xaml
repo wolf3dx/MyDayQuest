@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MyDayQuest.Views.AboutPage"
+             Title="О приложении">
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="16">
+
+            <Label Text="My Day Quest" FontSize="30" FontAttributes="Bold" />
+            <Label Text="M.D.Q" FontSize="16" Opacity="0.55" />
+
+            <Label Text="Что это" FontAttributes="Bold" FontSize="18" Margin="0,8,0,0" />
+            <Label LineHeight="1.35"
+                   Text="My Day Quest — приложение для управления делами в духе to-do. Крупные цели вы разбиваете на листы (Quest), а листы — на небольшие задачи." />
+
+            <Label Text="Для чего" FontAttributes="Bold" FontSize="18" Margin="0,8,0,0" />
+            <Label LineHeight="1.35"
+                   Text="Чтобы держать в фокусе главное: приложение собирает из ваших листов единый план на день — не больше нескольких задач за раз. Отмечаете выполненную — подтягивается следующая, и цель двигается шаг за шагом." />
+
+            <BoxView HeightRequest="1" Color="#30808080" Margin="0,8" />
+
+            <Label Text="Автор" FontAttributes="Bold" FontSize="18" />
+            <Label LineHeight="1.35"
+                   Text="Разработано Виталием Коноваловым." />
+            <Label Text="© 2026" Opacity="0.6" />
+            <Label Text="Версия 0.1" Opacity="0.6" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MyDayQuest.ViewModels"
+             x:Class="MyDayQuest.Views.QuestEditPage"
+             x:DataType="vm:QuestEditViewModel"
+             Title="Новый лист">
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="16" RowSpacing="12">
+
+        <VerticalStackLayout Grid.Row="0" Spacing="6">
+            <Label Text="Название листа" FontAttributes="Bold" />
+            <Entry Text="{Binding QuestName}" Placeholder="Например: Карнеги Quest" />
+        </VerticalStackLayout>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Задачи листа" FontAttributes="Bold" Margin="0,4,0,0" />
+
+                <CollectionView ItemsSource="{Binding Tasks}" SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:TaskInputRow">
+                            <Border StrokeShape="RoundRectangle 12"
+                                    Stroke="#40808080" StrokeThickness="1"
+                                    Padding="12" Margin="0,0,0,8">
+                                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto"
+                                      RowSpacing="8" ColumnSpacing="8">
+                                    <Entry Grid.Row="0" Grid.Column="0"
+                                           Text="{Binding Title}"
+                                           Placeholder="Что сделать" />
+                                    <Button Grid.Row="0" Grid.Column="1"
+                                            Text="✕"
+                                            WidthRequest="40" HeightRequest="40" CornerRadius="20"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:QuestEditViewModel}}, Path=RemoveTaskRowCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    <HorizontalStackLayout Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                                           Spacing="8">
+                                        <Label Text="с" VerticalOptions="Center" Opacity="0.6" />
+                                        <DatePicker Date="{Binding StartDate}" Format="dd.MM.yy" />
+                                        <Label Text="по" VerticalOptions="Center" Opacity="0.6" />
+                                        <DatePicker Date="{Binding Deadline}" Format="dd.MM.yy" />
+                                    </HorizontalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <Button Text="+ Добавить задачу"
+                        Command="{Binding AddTaskRowCommand}"
+                        HorizontalOptions="Start" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12">
+            <Button Grid.Column="0" Text="Отмена"
+                    Command="{Binding CancelCommand}" />
+            <Button Grid.Column="1" Text="Сохранить лист"
+                    Command="{Binding SaveCommand}" />
+        </Grid>
+    </Grid>
+</ContentPage>

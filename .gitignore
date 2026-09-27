@@ -1,0 +1,31 @@
+# ---- Сборочные артефакты .NET / MAUI ----
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+*.userprefs
+*.binlog
+
+# Промежуточные каталоги публикаций (в git идёт только готовая сборка в Release/)
+[Aa]rtifacts/
+
+# Распакованные сборки: в git идёт только упакованный zip актуальной версии
+Release/win-x64/
+Release/**/publish/
+
+# ---- Секреты (в репозиторий не попадают) ----
+*.token
+*.secret
+secrets.json
+appsettings.*.local.json
+.env
+.env.*
+
+# ---- Прочее ----
+*.log
+Thumbs.db
+.DS_Store
+
+# Временные файлы Visio/Office рядом с макетами
+~$*
