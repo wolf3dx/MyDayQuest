@@ -15,16 +15,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Select working Xcode
+      - name: Xcode info (use runner default)
         run: |
-          echo "Доступные Xcode:"; ls -d /Applications/Xcode_*.app 2>/dev/null || true
-          echo "Текущий по умолчанию:"; xcodebuild -version || true
-          # Берём самый свежий Xcode, у которого реально есть MacOSX SDK (пропускаем битые)
-          for x in $(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -Vr); do
-            if [ -d "$x/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk" ]; then
-              echo "Выбираю $x"; sudo xcode-select -s "$x/Contents/Developer"; break
-            fi
-          done
+          # Раннер по умолчанию уже указывает на полный Xcode_26.6.app (с macOS SDK);
+          # переопределять НЕ нужно (Xcode_26.6.0.app битый — без macOS SDK).
           xcodebuild -version
           xcrun --sdk macosx --show-sdk-path
 
