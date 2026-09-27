@@ -45,12 +45,24 @@ jobs:
             zip -ry ../MyDayQuest-macos.zip "$APP"
           fi
 
-      - name: Build iOS (simulator, unsigned)
-        run: >
-          dotnet build Source/MyDayQuest/MyDayQuest.csproj
-          -f net10.0-ios -c Release
-          -p:RuntimeIdentifier=iossimulator-arm64
-          -o artifacts/ios
+      - name: Build iOS device (unsigned) and package IPA for AltStore
+        run: |
+          dotnet build Source/MyDayQuest/MyDayQuest.csproj \
+            -f net10.0-ios -c Release \
+            -p:RuntimeIdentifier=ios-arm64 \
+            -p:CodesignRequired=false -p:EnableCodeSigning=false \
+            -o artifacts/ios
+          APP=$(find artifacts/ios -maxdepth 2 -name "*.app" -type d | head -1)
+          echo "iOS .app: $APP"
+          if [ -n "$APP" ]; then
+            rm -rf artifacts/Payload
+            mkdir -p artifacts/Payload
+            cp -R "$APP" artifacts/Payload/
+            (cd artifacts && zip -qry MyDayQuest-ios-unsigned.ipa Payload)
+            echo "IPA готов:"; ls -la artifacts/MyDayQuest-ios-unsigned.ipa
+          else
+            echo "iOS .app не найден"; exit 1
+          fi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -58,5 +70,5 @@ jobs:
           name: apple-builds
           path: |
             artifacts/MyDayQuest-macos.zip
-            artifacts/ios/**/*.app
+            artifacts/MyDayQuest-ios-unsigned.ipa
           if-no-files-found: warn
