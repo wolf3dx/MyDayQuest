@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="MyDayQuest.Avalonia/MyDayQuest.Avalonia.csproj" />
+  <Project Path="MyDayQuest.Core/MyDayQuest.Core.csproj" />
+  <Project Path="MyDayQuest/MyDayQuest.csproj" />
+</Solution>

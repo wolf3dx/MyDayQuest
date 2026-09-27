@@ -20,8 +20,8 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
-		// Данные
-		builder.Services.AddSingleton<AppDatabase>();
+		// Данные (путь к БД задаёт MAUI-голова)
+		builder.Services.AddSingleton(new AppDatabase(FileSystem.AppDataDirectory));
 		builder.Services.AddSingleton<SyncService>();
 
 		// ViewModels

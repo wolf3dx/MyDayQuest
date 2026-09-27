@@ -1,0 +1,149 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:MyDayQuest.Avalonia.ViewModels"
+        x:Class="MyDayQuest.Avalonia.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Width="400" MinWidth="400" MaxWidth="400"
+        Height="730"
+        Title="My Day Quest">
+
+    <Window.Styles>
+        <Style Selector="Button.header">
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Foreground" Value="#222222" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="BorderBrush" Value="#40000000" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="Button.header:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#33512BD4" />
+        </Style>
+        <Style Selector="Button.action">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#30000000" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="Width" Value="76" />
+            <Setter Property="Height" Value="60" />
+            <Setter Property="FontSize" Value="30" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto,Auto" Background="White">
+
+        <!-- ШАПКА -->
+        <Grid Grid.Row="0" Margin="10,8" RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+            <TextBlock Grid.Row="0" Text="M.D.Q" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
+            <Image Grid.Row="0" Source="/Assets/update.png" Width="34" Height="34"
+                   HorizontalAlignment="Left" IsVisible="{Binding IsUpdateAvailable}"
+                   PointerPressed="OnUpdateClick" />
+            <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*" ColumnSpacing="6">
+                <Button Grid.Column="0" Classes="header" Content="Save" Background="#DCE0F7" Click="OnSave" />
+                <Button Grid.Column="1" Classes="header" Content="Load" Background="#FBE2D5" Click="OnLoad" />
+                <Button Grid.Column="2" Classes="header" Content="Sync" Background="#FBF3D0" Click="OnSync" />
+                <Button Grid.Column="3" Classes="header" Content="About" Background="#DDEFD9" Click="OnAbout" />
+            </Grid>
+            <Rectangle Grid.Row="2" Height="1" Fill="#30000000" />
+        </Grid>
+
+        <!-- СРЕДНЕЕ ПОЛЕ -->
+        <Grid Grid.Row="1" Margin="16,12">
+            <!-- Главное окно: дневной план -->
+            <ScrollViewer IsVisible="{Binding IsHomeVisible}">
+                <StackPanel>
+                    <TextBlock Text="Отметьте чек-бокс у названия задания в листе, чтобы оно появилось здесь."
+                               Foreground="#70000000" TextWrapping="Wrap" TextAlignment="Center"
+                               Margin="8,40" IsVisible="{Binding DailyItems.Count, Converter={x:Static vm:Conv.IsZero}}" />
+                    <ItemsControl ItemsSource="{Binding DailyItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:DailyCardVM">
+                                <Border BorderBrush="#50000000" BorderThickness="2" CornerRadius="16" Padding="12" Margin="0,0,0,12">
+                                    <StackPanel Spacing="10">
+                                        <TextBlock Text="{Binding ListLine}" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center" />
+                                        <Border BorderBrush="#50000000" BorderThickness="1.5" CornerRadius="22" Padding="14,8">
+                                            <TextBlock Text="{Binding NameLine}" FontWeight="Bold" HorizontalAlignment="Center" />
+                                        </Border>
+                                        <Grid ColumnDefinitions="Auto,*" IsVisible="{Binding HasCurrentSubtask}">
+                                            <CheckBox Grid.Column="0" IsChecked="False" IsCheckedChanged="OnDailySubtaskChecked" Tag="{Binding}" />
+                                            <TextBlock Grid.Column="1" Text="{Binding CurrentSubtaskText}" VerticalAlignment="Center" />
+                                        </Grid>
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <TextBlock Grid.Column="0" Text="{Binding DateRange}" FontWeight="Bold" FontSize="12" />
+                                            <TextBlock Grid.Column="1" Text="{Binding ProgressText}" FontWeight="Bold" FontSize="12" />
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Открытый лист: задания -->
+            <ScrollViewer IsVisible="{Binding IsListOpen}">
+                <ItemsControl ItemsSource="{Binding CurrentTasks}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:TaskCardVM">
+                            <Border BorderThickness="2" CornerRadius="16" Padding="12" Margin="0,0,0,10"
+                                    BorderBrush="{Binding IsSelected, Converter={x:Static vm:Conv.SelBrush}}"
+                                    Tapped="OnTaskTapped" DoubleTapped="OnTaskDoubleTapped" Tag="{Binding}">
+                                <StackPanel Spacing="12">
+                                    <Border BorderBrush="#50000000" BorderThickness="1.5" CornerRadius="22" Padding="10,6">
+                                        <Grid>
+                                            <TextBlock Text="{Binding NameLine}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <CheckBox HorizontalAlignment="Left" IsChecked="{Binding InDailyPlan, Mode=TwoWay}"
+                                                      IsCheckedChanged="OnPlanChecked" Tag="{Binding}" />
+                                        </Grid>
+                                    </Border>
+                                    <Grid ColumnDefinitions="Auto,*" IsVisible="{Binding HasCurrentSubtask}">
+                                        <CheckBox Grid.Column="0" IsChecked="False" IsCheckedChanged="OnTaskSubtaskChecked" Tag="{Binding}" />
+                                        <TextBlock Grid.Column="1" Text="{Binding CurrentSubtaskText}" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Grid.Column="0" Text="{Binding DateRange}" FontWeight="Bold" FontSize="12" />
+                                        <TextBlock Grid.Column="1" Text="{Binding ProgressText}" FontWeight="Bold" FontSize="12" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- НИЖНЯЯ ПАНЕЛЬ + / QUEST / - -->
+        <Grid Grid.Row="2" Margin="16,4" ColumnDefinitions="Auto,*,Auto,*,Auto">
+            <Button Grid.Column="0" Classes="action" Content="+" Foreground="#4CAF50" Command="{Binding AddCommand}" />
+            <Button Grid.Column="2" Classes="action" Content="QUEST" FontSize="18" Foreground="#F5A623" Width="110" Command="{Binding GoHomeCommand}" />
+            <Button Grid.Column="4" Classes="action" Content="–" Foreground="#E53935" Command="{Binding RemoveCommand}" />
+        </Grid>
+
+        <!-- ЛЕНТА ВКЛАДОК -->
+        <Border Grid.Row="3" Background="#F7F7F7" Height="96" BorderBrush="#30000000" BorderThickness="0,1,0,0">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Padding="20,12">
+                <ItemsControl ItemsSource="{Binding Tabs}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:QuestTabVM">
+                            <Button Width="120" Height="60" Margin="-14,0,0,0" Padding="8"
+                                    Background="{Binding ColorHex}"
+                                    Command="{Binding ((vm:MainViewModel)DataContext).OpenTabCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="{Binding}">
+                                <TextBlock Text="{Binding Name}" Foreground="#222222" FontWeight="Bold"
+                                           TextTrimming="CharacterEllipsis" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</Window>

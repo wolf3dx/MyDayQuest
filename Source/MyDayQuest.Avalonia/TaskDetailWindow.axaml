@@ -1,0 +1,67 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:MyDayQuest.Avalonia.ViewModels"
+        x:Class="MyDayQuest.Avalonia.TaskDetailWindow"
+        x:DataType="vm:TaskDetailViewModel"
+        Width="440" Height="620"
+        WindowStartupLocation="CenterOwner"
+        Title="Задание">
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="16" RowSpacing="12" Background="White">
+
+        <!-- Верхний блок -->
+        <Border Grid.Row="0" BorderBrush="#50000000" BorderThickness="1.5" CornerRadius="14" Padding="14,10">
+            <StackPanel Spacing="10">
+                <Grid ColumnDefinitions="120,*" ColumnSpacing="8">
+                    <TextBlock Grid.Column="0" Text="NAME:" FontWeight="Bold" VerticalAlignment="Center" />
+                    <TextBox Grid.Column="1" Text="{Binding TaskName, Mode=TwoWay}" Watermark="Название задания" />
+                </Grid>
+                <Grid ColumnDefinitions="120,*" ColumnSpacing="8">
+                    <TextBlock Grid.Column="0" Text="Data Start:" FontWeight="Bold" VerticalAlignment="Center" />
+                    <DatePicker Grid.Column="1" SelectedDate="{Binding StartDate, Mode=TwoWay}" HorizontalAlignment="Left" />
+                </Grid>
+                <Grid ColumnDefinitions="120,*" ColumnSpacing="8">
+                    <TextBlock Grid.Column="0" Text="Data Ded Line:" FontWeight="Bold" VerticalAlignment="Center" />
+                    <DatePicker Grid.Column="1" SelectedDate="{Binding Deadline, Mode=TwoWay}" HorizontalAlignment="Left" />
+                </Grid>
+                <Grid ColumnDefinitions="120,*,Auto" ColumnSpacing="8">
+                    <TextBlock Grid.Column="0" Text="Progres:" FontWeight="Bold" VerticalAlignment="Center" />
+                    <ProgressBar Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding Progress}" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" Text="{Binding ProgressPercentText}" FontWeight="Bold" VerticalAlignment="Center" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Подзадания -->
+        <ScrollViewer Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding Subtasks}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:SubtaskRowVM">
+                        <Border BorderThickness="2" CornerRadius="10" Padding="8" Margin="0,0,0,6"
+                                BorderBrush="{Binding IsSelected, Converter={x:Static vm:Conv.SelBrush}}"
+                                Tapped="OnSubtaskTapped" Tag="{Binding}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                <CheckBox Grid.Column="0" IsChecked="{Binding IsDone, Mode=TwoWay}" VerticalAlignment="Center" />
+                                <TextBox Grid.Column="1" Text="{Binding Title, Mode=TwoWay}" Watermark="Подзадание" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Кнопки -->
+        <StackPanel Grid.Row="2" Spacing="10">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <Button Grid.Column="0" Content="+" FontSize="24" FontWeight="Bold" Width="70" Height="50"
+                        Foreground="#4CAF50" Command="{Binding AddSubtaskCommand}" />
+                <Button Grid.Column="2" Content="–" FontSize="24" FontWeight="Bold" Width="70" Height="50"
+                        Foreground="#E53935" Command="{Binding RemoveSubtaskCommand}" />
+            </Grid>
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Button Grid.Column="0" Content="Отмена" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Click="OnCancel" />
+                <Button Grid.Column="1" Content="Сохранить" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Click="OnSave" />
+            </Grid>
+        </StackPanel>
+    </Grid>
+</Window>
