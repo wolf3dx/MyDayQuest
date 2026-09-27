@@ -9,10 +9,18 @@ on:
 
 jobs:
   apple:
-    runs-on: macos-15
+    # macos-26 несёт Xcode 26.x, который требует свежий .NET-SDK для iOS/MacCatalyst (26.5)
+    runs-on: macos-26
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Select latest Xcode
+        run: |
+          LATEST=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)
+          echo "Using $LATEST"
+          if [ -n "$LATEST" ]; then sudo xcode-select -s "$LATEST/Contents/Developer"; fi
+          xcodebuild -version
 
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
