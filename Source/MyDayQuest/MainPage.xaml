@@ -414,7 +414,7 @@
                         <DataTemplate x:DataType="vm:QuestTab">
                             <Border StrokeShape="RoundRectangle 8,8,0,0"
                                     StrokeThickness="1" Stroke="{StaticResource QuestGoldDim}"
-                                    WidthRequest="120"
+                                    WidthRequest="132"
                                     Margin="-14,0,0,0"
                                     BackgroundColor="{StaticResource Parchment}"
                                     Padding="0">
@@ -433,12 +433,12 @@
                                 <Grid>
                                     <!-- Fill + выравнивание по центру: иначе на Android длинное
                                          название не обрезается, а вылезает за края закладки. -->
-                                    <Label Text="{Binding Name}"
+                                    <Label Text="{Binding ShortName}"
                                            FontFamily="{StaticResource SerifFont}"
                                            TextColor="{StaticResource QuestInk}"
-                                           FontSize="13" FontAttributes="Bold"
+                                           FontSize="12" FontAttributes="Bold"
                                            LineBreakMode="TailTruncation"
-                                           WidthRequest="104"
+                                           Margin="6,0"
                                            HorizontalOptions="Center" VerticalOptions="Center"
                                            HorizontalTextAlignment="Center" />
                                 </Grid>
