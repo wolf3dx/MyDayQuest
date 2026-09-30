@@ -9,8 +9,17 @@
 		<TargetFrameworks>net10.0-android</TargetFrameworks>
 		<!-- Apple-SDK закреплён на ветке 26.x: SDK 27.0 требует Xcode 27, которого
 	     нет ни на раннерах GitHub, ни в наличии у нас. -->
-		<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net10.0-ios26.0;net10.0-maccatalyst26.0</TargetFrameworks>
+		<!-- Apple-платформы только на macOS: на Windows их всё равно не собрать,
+	     а восстановление тянет сотни мегабайт пакетов SDK впустую.
+	     Версия SDK закреплена на ветке 26.x — 27.0 требует Xcode 27,
+	     которого нет на раннерах GitHub. -->
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('osx'))">$(TargetFrameworks);net10.0-ios26.0;net10.0-maccatalyst26.0</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
+
+		<!-- Выпускной APK — только arm64-v8a: это все современные телефоны.
+		     x86_64 нужен лишь эмулятору и собирается отдельным пакетом,
+		     иначе телефон качает и распаковывает вдвое больше. -->
+		<RuntimeIdentifiers Condition="'$(TargetFramework)' == 'net10.0-android' and '$(Configuration)' == 'Release'">android-arm64</RuntimeIdentifiers>
 
 		<!-- Note for MacCatalyst:
 		The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
