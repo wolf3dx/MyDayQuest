@@ -5,7 +5,7 @@
 
     <!-- Note: For Android please see also Platforms\Android\Resources\values\colors.xml -->
 
-    <Color x:Key="Primary">#512BD4</Color>
+    <Color x:Key="Primary">#D8A22A</Color>
     <Color x:Key="PrimaryDark">#ac99ea</Color>
     <Color x:Key="PrimaryDarkText">#242424</Color>
     <Color x:Key="Secondary">#DFD8F7</Color>
@@ -41,4 +41,21 @@
     <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}"/>
     <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}"/>
     <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}"/>
+
+    <!-- ==== Палитра «книги заданий»: тёмная кожа, пергамент и золото ==== -->
+    <Color x:Key="Leather">#15100A</Color>          <!-- фон окна -->
+    <Color x:Key="LeatherPanel">#1E1710</Color>     <!-- нижняя панель вкладок -->
+    <Color x:Key="LeatherButton">#3A2C18</Color>    <!-- кнопки -->
+    <Color x:Key="Parchment">#EBDCB8</Color>        <!-- плашки заданий -->
+    <Color x:Key="ParchmentEdge">#C9AE7B</Color>    <!-- край пергамента -->
+    <Color x:Key="QuestGold">#D8A22A</Color>        <!-- рамки, акценты -->
+    <Color x:Key="QuestGoldBright">#F2D48A</Color>  <!-- заголовки, текст на тёмном -->
+    <Color x:Key="QuestGoldDim">#6E5320</Color>     <!-- разделители -->
+    <Color x:Key="QuestInk">#2A1F12</Color>         <!-- текст на пергаменте -->
+    <Color x:Key="QuestInkSoft">#6B5537</Color>     <!-- вторичный текст -->
+    <Color x:Key="QuestGreen">#5FB13A</Color>
+    <Color x:Key="QuestRed">#C0392B</Color>
+
+    <SolidColorBrush x:Key="ParchmentBrush" Color="{StaticResource Parchment}"/>
+    <SolidColorBrush x:Key="QuestGoldBrush" Color="{StaticResource QuestGold}"/>
 </ResourceDictionary>

@@ -6,34 +6,37 @@
              x:DataType="vm:TaskDetailViewModel"
              Title="Задание">
 
-    <Grid RowDefinitions="Auto,*,Auto" Padding="16" RowSpacing="12">
+    <Grid RowDefinitions="Auto,*,Auto" Padding="16" RowSpacing="12"
+          BackgroundColor="{StaticResource Leather}">
 
         <!-- Верхний блок: NAME, Data Start, Data Ded Line, Progres -->
         <VerticalStackLayout Grid.Row="0" Spacing="10">
-            <Border StrokeShape="RoundRectangle 14" StrokeThickness="1.5" Stroke="#50000000" Padding="14,10">
+            <Border StrokeShape="RoundRectangle 8" StrokeThickness="2"
+                    Stroke="{StaticResource QuestGold}"
+                    BackgroundColor="{StaticResource Parchment}" Padding="14,10">
                 <VerticalStackLayout Spacing="10">
 
                     <Grid ColumnDefinitions="120,*" ColumnSpacing="8">
-                        <Label Text="NAME:" FontAttributes="Bold" VerticalOptions="Center" />
-                        <Entry Grid.Column="1" Text="{Binding TaskName}" Placeholder="Название задания" />
+                        <Label Text="NAME:" TextColor="{StaticResource QuestInk}" FontAttributes="Bold" VerticalOptions="Center" />
+                        <Entry Grid.Column="1" Text="{Binding TaskName}" Placeholder="Название задания" TextColor="{StaticResource QuestInk}" />
                     </Grid>
 
                     <Grid ColumnDefinitions="120,*" ColumnSpacing="8">
-                        <Label Text="Data Start:" FontAttributes="Bold" VerticalOptions="Center" />
+                        <Label Text="Data Start:" TextColor="{StaticResource QuestInk}" FontAttributes="Bold" VerticalOptions="Center" />
                         <DatePicker Grid.Column="1" Date="{Binding StartDate}" Format="dd.MM.yy" HorizontalOptions="Start" />
                     </Grid>
 
                     <Grid ColumnDefinitions="120,*" ColumnSpacing="8">
-                        <Label Text="Data Ded Line:" FontAttributes="Bold" VerticalOptions="Center" />
+                        <Label Text="Data Ded Line:" TextColor="{StaticResource QuestInk}" FontAttributes="Bold" VerticalOptions="Center" />
                         <DatePicker Grid.Column="1" Date="{Binding Deadline}" Format="dd.MM.yy" HorizontalOptions="Start" />
                     </Grid>
 
                     <Grid ColumnDefinitions="120,*,Auto" ColumnSpacing="8">
-                        <Label Text="Progres:" FontAttributes="Bold" VerticalOptions="Center" />
-                        <ProgressBar Grid.Column="1"
+                        <Label Text="Progres:" TextColor="{StaticResource QuestInk}" FontAttributes="Bold" VerticalOptions="Center" />
+                        <ProgressBar Grid.Column="1" ProgressColor="{StaticResource QuestGold}"
                                      Progress="{Binding Progress, Converter={StaticResource PercentToFraction}}"
                                      VerticalOptions="Center" />
-                        <Label Grid.Column="2" Text="{Binding ProgressPercentText}" FontAttributes="Bold" />
+                        <Label Grid.Column="2" Text="{Binding ProgressPercentText}" TextColor="{StaticResource QuestInk}" FontAttributes="Bold" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
@@ -42,17 +45,19 @@
         <!-- Подзадания -->
         <CollectionView Grid.Row="1" ItemsSource="{Binding Subtasks}" SelectionMode="None">
             <CollectionView.EmptyView>
-                <Label Text="Подзаданий нет. Добавьте строкой «+»." Opacity="0.45" Padding="8,16" />
+                <Label Text="Цели задания не заданы. Добавьте их кнопкой «+»."
+                       TextColor="{StaticResource QuestGoldBright}" Opacity="0.5" Padding="8,16" />
             </CollectionView.EmptyView>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="vm:SubtaskVM">
-                    <Border StrokeShape="RoundRectangle 10" StrokeThickness="2" Padding="8" Margin="0,0,0,6">
+                    <Border StrokeShape="RoundRectangle 6" StrokeThickness="2"
+                            BackgroundColor="{StaticResource Parchment}" Padding="8" Margin="0,0,0,6">
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                <Setter Property="Stroke" Value="{StaticResource Primary}" />
+                                <Setter Property="Stroke" Value="{StaticResource QuestGoldBright}" />
                             </DataTrigger>
                             <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="False">
-                                <Setter Property="Stroke" Value="#30808080" />
+                                <Setter Property="Stroke" Value="{StaticResource ParchmentEdge}" />
                             </DataTrigger>
                         </Border.Triggers>
                         <Border.GestureRecognizers>
@@ -64,7 +69,8 @@
                             <CheckBox Grid.Column="0"
                                       IsChecked="{Binding IsDone}"
                                       VerticalOptions="Center" />
-                            <Entry Grid.Column="1" Text="{Binding Title}" Placeholder="Подзадание"
+                            <Entry Grid.Column="1" Text="{Binding Title}" Placeholder="Цель задания"
+                                   TextColor="{StaticResource QuestInk}"
                                    VerticalOptions="Center" />
                         </Grid>
                     </Border>
@@ -76,19 +82,29 @@
         <VerticalStackLayout Grid.Row="2" Spacing="10">
             <Grid ColumnDefinitions="Auto,*,Auto">
                 <Button Grid.Column="0" Text="+" FontSize="26" FontAttributes="Bold"
-                        TextColor="#4CAF50" BackgroundColor="White"
-                        BorderColor="#30000000" BorderWidth="1"
-                        WidthRequest="70" HeightRequest="54" CornerRadius="12"
+                        TextColor="{StaticResource QuestGreen}"
+                        BackgroundColor="{StaticResource LeatherButton}"
+                        BorderColor="{StaticResource QuestGold}" BorderWidth="1"
+                        WidthRequest="70" HeightRequest="54" CornerRadius="6"
                         Command="{Binding AddSubtaskCommand}" />
                 <Button Grid.Column="2" Text="–" FontSize="26" FontAttributes="Bold"
-                        TextColor="#E53935" BackgroundColor="White"
-                        BorderColor="#30000000" BorderWidth="1"
-                        WidthRequest="70" HeightRequest="54" CornerRadius="12"
+                        TextColor="{StaticResource QuestRed}"
+                        BackgroundColor="{StaticResource LeatherButton}"
+                        BorderColor="{StaticResource QuestGold}" BorderWidth="1"
+                        WidthRequest="70" HeightRequest="54" CornerRadius="6"
                         Command="{Binding RemoveSubtaskCommand}" />
             </Grid>
             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                <Button Grid.Column="0" Text="Отмена" Command="{Binding CancelCommand}" />
-                <Button Grid.Column="1" Text="Сохранить" Command="{Binding SaveCommand}" />
+                <Button Grid.Column="0" Text="Отмена"
+                        TextColor="{StaticResource QuestGoldBright}"
+                        BackgroundColor="{StaticResource LeatherButton}"
+                        BorderColor="{StaticResource QuestGold}" BorderWidth="1" CornerRadius="6"
+                        Command="{Binding CancelCommand}" />
+                <Button Grid.Column="1" Text="Принять"
+                        TextColor="{StaticResource QuestGoldBright}"
+                        BackgroundColor="{StaticResource LeatherButton}"
+                        BorderColor="{StaticResource QuestGold}" BorderWidth="1" CornerRadius="6"
+                        Command="{Binding SaveCommand}" />
             </Grid>
         </VerticalStackLayout>
     </Grid>

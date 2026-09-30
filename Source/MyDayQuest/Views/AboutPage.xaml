@@ -2,28 +2,55 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MyDayQuest.Views.AboutPage"
+             BackgroundColor="{StaticResource Leather}"
              Title="О приложении">
     <ScrollView>
-        <VerticalStackLayout Padding="24" Spacing="16">
+        <VerticalStackLayout Padding="20" Spacing="14">
 
-            <Label Text="My Day Quest" FontSize="30" FontAttributes="Bold" />
-            <Label Text="M.D.Q" FontSize="16" Opacity="0.55" />
+            <Label Text="!" TextColor="{StaticResource QuestGold}"
+                   FontSize="44" FontAttributes="Bold" HorizontalOptions="Center" />
+            <Label Text="My Day Quest" TextColor="{StaticResource QuestGoldBright}"
+                   CharacterSpacing="2" FontSize="28" FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+            <Label Text="M.D.Q" TextColor="{StaticResource QuestGoldBright}"
+                   FontSize="15" Opacity="0.6" HorizontalOptions="Center" />
 
-            <Label Text="Что это" FontAttributes="Bold" FontSize="18" Margin="0,8,0,0" />
-            <Label LineHeight="1.35"
-                   Text="My Day Quest — приложение для управления делами в духе to-do. Крупные цели вы разбиваете на листы (Quest), а листы — на небольшие задачи." />
+            <!-- Свиток с описанием -->
+            <Border StrokeShape="RoundRectangle 8" StrokeThickness="2"
+                    Stroke="{StaticResource QuestGold}"
+                    BackgroundColor="{StaticResource Parchment}"
+                    Padding="16" Margin="0,6,0,0">
+                <VerticalStackLayout Spacing="10">
 
-            <Label Text="Для чего" FontAttributes="Bold" FontSize="18" Margin="0,8,0,0" />
-            <Label LineHeight="1.35"
-                   Text="Чтобы держать в фокусе главное: приложение собирает из ваших листов единый план на день — не больше нескольких задач за раз. Отмечаете выполненную — подтягивается следующая, и цель двигается шаг за шагом." />
+                    <Label Text="Что это" TextColor="{StaticResource QuestInk}"
+                           FontAttributes="Bold" FontSize="18" />
+                    <Label TextColor="{StaticResource QuestInk}" LineHeight="1.35"
+                           Text="My Day Quest — приложение для управления делами в духе to-do. Крупные цели вы разбиваете на листы (Quest), листы — на задания, а задания — на цели-подзадания." />
 
-            <BoxView HeightRequest="1" Color="#30808080" Margin="0,8" />
+                    <Label Text="Для чего" TextColor="{StaticResource QuestInk}"
+                           FontAttributes="Bold" FontSize="18" Margin="0,6,0,0" />
+                    <Label TextColor="{StaticResource QuestInk}" LineHeight="1.35"
+                           Text="Чтобы держать в фокусе главное: приложение собирает из ваших листов единый план на день — не больше четырёх заданий за раз. Отмечаете выполненное — подтягивается следующее, и цель двигается шаг за шагом." />
 
-            <Label Text="Автор" FontAttributes="Bold" FontSize="18" />
-            <Label LineHeight="1.35"
-                   Text="Разработано Виталием Коноваловым." />
-            <Label Text="© 2026" Opacity="0.6" />
-            <Label Text="Версия 0.1" Opacity="0.6" />
+                    <Label Text="Синхронизация" TextColor="{StaticResource QuestInk}"
+                           FontAttributes="Bold" FontSize="18" Margin="0,6,0,0" />
+                    <Label TextColor="{StaticResource QuestInk}" LineHeight="1.35"
+                           Text="Данные можно сохранить в файл .mdq или подключить облако — Яндекс.Диск, OneDrive либо Google Drive. После подключения приложение само кладёт туда файл данных и следит за его свежестью." />
+
+                    <BoxView HeightRequest="1" Color="{StaticResource ParchmentEdge}" Margin="0,8" />
+
+                    <Label Text="Автор" TextColor="{StaticResource QuestInk}"
+                           FontAttributes="Bold" FontSize="18" />
+                    <Label TextColor="{StaticResource QuestInk}" LineHeight="1.35"
+                           Text="Разработано Виталием Коноваловым (v.k.andreevich)." />
+                    <Label Text="© 2026" TextColor="{StaticResource QuestInkSoft}" FontSize="13" />
+                    <Label Text="Версия 0.1" TextColor="{StaticResource QuestInkSoft}" FontSize="13" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Label TextColor="{StaticResource QuestGoldBright}" Opacity="0.45" FontSize="11"
+                   LineHeight="1.3" HorizontalTextAlignment="Center"
+                   Text="Оформление навеяно журналами заданий классических RPG. Приложение не связано с Blizzard Entertainment и не использует её материалы." />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

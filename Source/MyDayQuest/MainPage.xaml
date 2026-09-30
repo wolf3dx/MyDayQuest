@@ -7,6 +7,14 @@
              Shell.NavBarIsVisible="False">
 
     <ContentPage.Resources>
+
+        <!-- Серифный шрифт берём системный: на каждой платформе он свой. -->
+        <OnPlatform x:Key="SerifFont" x:TypeArguments="x:String">
+            <On Platform="WinUI" Value="Georgia" />
+            <On Platform="iOS, MacCatalyst" Value="Georgia" />
+            <On Platform="Android" Value="serif" />
+        </OnPlatform>
+
         <!-- Реакция кнопок на наведение (PointerOver) и нажатие (Pressed) -->
         <Style x:Key="HoverButton" TargetType="Button">
             <Setter Property="VisualStateManager.VisualStateGroups">
@@ -20,15 +28,14 @@
                         </VisualState>
                         <VisualState x:Name="PointerOver">
                             <VisualState.Setters>
-                                <Setter Property="Scale" Value="1.06" />
-                                <Setter Property="Opacity" Value="0.9" />
-                                <Setter Property="BorderColor" Value="{StaticResource Primary}" />
+                                <Setter Property="Scale" Value="1.04" />
+                                <Setter Property="BorderColor" Value="{StaticResource QuestGoldBright}" />
                             </VisualState.Setters>
                         </VisualState>
                         <VisualState x:Name="Pressed">
                             <VisualState.Setters>
-                                <Setter Property="Scale" Value="0.95" />
-                                <Setter Property="Opacity" Value="0.8" />
+                                <Setter Property="Scale" Value="0.96" />
+                                <Setter Property="Opacity" Value="0.85" />
                             </VisualState.Setters>
                         </VisualState>
                     </VisualStateGroup>
@@ -36,121 +43,254 @@
             </Setter>
         </Style>
 
+        <!-- Кнопка-«камень»: тёмный градиент в золотой рамке -->
         <Style x:Key="HeaderButton" TargetType="Button" BasedOn="{StaticResource HoverButton}">
-            <Setter Property="TextColor" Value="#222222" />
-            <Setter Property="CornerRadius" Value="10" />
-            <Setter Property="HeightRequest" Value="40" />
+            <Setter Property="TextColor" Value="{StaticResource QuestGoldBright}" />
+            <Setter Property="FontFamily" Value="{StaticResource SerifFont}" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="HeightRequest" Value="36" />
             <Setter Property="Padding" Value="0" />
             <Setter Property="FontSize" Value="13" />
-            <Setter Property="FontAttributes" Value="Bold" />
             <Setter Property="BorderWidth" Value="1" />
-            <Setter Property="BorderColor" Value="#40000000" />
+            <Setter Property="BorderColor" Value="{StaticResource QuestGold}" />
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#48381F" Offset="0" />
+                        <GradientStop Color="#221A0E" Offset="1" />
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
         </Style>
+
+        <!-- Крупная кнопка действия (+ / QUEST / –) -->
+        <Style x:Key="ActionButton" TargetType="Button" BasedOn="{StaticResource HoverButton}">
+            <Setter Property="FontFamily" Value="{StaticResource SerifFont}" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="HeightRequest" Value="58" />
+            <Setter Property="BorderWidth" Value="2" />
+            <Setter Property="BorderColor" Value="{StaticResource QuestGold}" />
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#4A3920" Offset="0" />
+                        <GradientStop Color="#1E170D" Offset="1" />
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto,*,Auto">
+    <Grid RowDefinitions="Auto,*,Auto" BackgroundColor="{StaticResource Leather}">
 
-        <!-- ВЕРХ: M.D.Q по центру + кнопки Save/Load/Sync/About -->
-        <Grid Grid.Row="0" Padding="10,8" RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
-            <Label Grid.Row="0" Text="M.D.Q"
-                   FontSize="18" FontAttributes="Bold"
-                   HorizontalOptions="Center" VerticalOptions="Center" />
+        <!-- Тёмная кожа обложки под всем содержимым -->
+        <Image Grid.Row="0" Grid.RowSpan="3" Source="leatherbg.png" Aspect="AspectFill"
+               WidthRequest="1" HeightRequest="1"
+               HorizontalOptions="Fill" VerticalOptions="Fill" />
+
+        <!-- ============ ВЕРХ: заголовок журнала и кнопки ============ -->
+        <Grid Grid.Row="0" Padding="12,10,12,0" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="7">
+
+            <!-- Название с ромбами-разделителями -->
+            <HorizontalStackLayout Grid.Row="0" HorizontalOptions="Center" Spacing="10">
+                <Label Text="◆" TextColor="{StaticResource QuestGold}" FontSize="11"
+                       VerticalOptions="Center" Opacity="0.8" />
+                <Label Text="M · D · Q"
+                       FontFamily="{StaticResource SerifFont}"
+                       TextColor="{StaticResource QuestGoldBright}"
+                       CharacterSpacing="2" FontSize="22" FontAttributes="Bold"
+                       VerticalOptions="Center" />
+                <Label Text="◆" TextColor="{StaticResource QuestGold}" FontSize="11"
+                       VerticalOptions="Center" Opacity="0.8" />
+            </HorizontalStackLayout>
+
+            <Label Grid.Row="1" Text="ЖУРНАЛ ЗАДАНИЙ"
+                   FontFamily="{StaticResource SerifFont}"
+                   TextColor="{StaticResource QuestGold}" Opacity="0.75"
+                   CharacterSpacing="5" FontSize="10"
+                   HorizontalOptions="Center" />
+
             <!-- Иконка обновления (появляется, когда есть новая версия) -->
             <ImageButton Grid.Row="0"
                          Source="update.png"
                          IsVisible="{Binding IsUpdateAvailable}"
                          Command="{Binding UpdateAppCommand}"
                          HorizontalOptions="Start" VerticalOptions="Center"
-                         WidthRequest="38" HeightRequest="38"
+                         WidthRequest="34" HeightRequest="34"
                          BackgroundColor="Transparent" />
 
-            <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*" ColumnSpacing="6">
+            <Grid Grid.Row="2" ColumnDefinitions="*,*,*,*" ColumnSpacing="6" Margin="0,4,0,0">
                 <Button Grid.Column="0" Text="Save"
-                        Style="{StaticResource HeaderButton}" BackgroundColor="#DCE0F7"
+                        Style="{StaticResource HeaderButton}"
                         Command="{Binding SaveCommand}" />
                 <Button Grid.Column="1" Text="Load"
-                        Style="{StaticResource HeaderButton}" BackgroundColor="#FBE2D5"
+                        Style="{StaticResource HeaderButton}"
                         Command="{Binding LoadFromFileCommand}" />
                 <Button Grid.Column="2" Text="Sync"
-                        Style="{StaticResource HeaderButton}" BackgroundColor="#FBF3D0"
+                        Style="{StaticResource HeaderButton}"
                         Command="{Binding SyncCommand}" />
                 <Button Grid.Column="3" Text="About"
-                        Style="{StaticResource HeaderButton}" BackgroundColor="#DDEFD9"
+                        Style="{StaticResource HeaderButton}"
                         Clicked="OnAboutClicked" />
             </Grid>
 
-            <BoxView Grid.Row="2" HeightRequest="1" Color="#30000000" />
+            <!-- Облако: подключение и состояние автосинхронизации -->
+            <Grid Grid.Row="3" ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                <Button Grid.Column="0" Text="Cloud"
+                        Style="{StaticResource HeaderButton}"
+                        WidthRequest="88"
+                        Command="{Binding CloudCommand}" />
+                <Label Grid.Column="1" Text="{Binding CloudStatus}"
+                       FontFamily="{StaticResource SerifFont}"
+                       TextColor="{StaticResource QuestGoldBright}"
+                       FontSize="11" Opacity="0.7" LineBreakMode="TailTruncation"
+                       VerticalOptions="Center" />
+            </Grid>
+
+            <!-- Золотая линия под шапкой -->
+            <Grid Grid.Row="4" Margin="0,6,0,0" HeightRequest="3">
+                <BoxView HeightRequest="1" Color="{StaticResource QuestGold}"
+                         Opacity="0.85" VerticalOptions="Start" />
+                <BoxView HeightRequest="1" Color="{StaticResource QuestGoldDim}"
+                         VerticalOptions="End" />
+            </Grid>
         </Grid>
 
-        <!-- СРЕДНЕЕ ПОЛЕ -->
-        <Grid Grid.Row="1" RowDefinitions="*,Auto" Padding="16,12">
+        <!-- ============ СРЕДНЕЕ ПОЛЕ ============ -->
+        <Grid Grid.Row="1" RowDefinitions="*,Auto" Padding="14,12">
 
-            <!-- Главное окно: плашки заданий дневного плана (когда лист не открыт) -->
+            <!-- Главное окно: задания дневного плана (когда лист не открыт) -->
             <CollectionView Grid.Row="0"
                             IsVisible="{Binding IsEmptyFieldVisible}"
                             ItemsSource="{Binding DailyItems}"
                             SelectionMode="None">
                 <CollectionView.EmptyView>
-                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Fill" Spacing="6" Padding="8,24">
-                        <Label Text="Отметьте чек-бокс у названия задания в листе,&#10;чтобы оно появилось здесь."
-                               HorizontalOptions="Fill" HorizontalTextAlignment="Center"
-                               LineBreakMode="WordWrap" Opacity="0.45" />
+                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Fill" Spacing="10" Padding="16,24">
+                        <Label Text="!" TextColor="{StaticResource QuestGold}" Opacity="0.35"
+                               FontFamily="{StaticResource SerifFont}"
+                               FontSize="52" FontAttributes="Bold" HorizontalOptions="Center" />
+                        <Label Text="Журнал заданий пуст"
+                               FontFamily="{StaticResource SerifFont}"
+                               TextColor="{StaticResource QuestGoldBright}" Opacity="0.65"
+                               FontSize="15" HorizontalOptions="Center" />
+                        <Label Text="Отметьте задание в листе — и оно появится здесь."
+                               FontFamily="{StaticResource SerifFont}"
+                               TextColor="{StaticResource QuestGoldBright}" Opacity="0.4"
+                               FontSize="12" HorizontalTextAlignment="Center"
+                               LineBreakMode="WordWrap" />
                     </VerticalStackLayout>
                 </CollectionView.EmptyView>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:DailyTaskVM">
-                        <Border StrokeShape="RoundRectangle 16" StrokeThickness="2" Stroke="#50000000"
-                                Padding="12" Margin="0,0,0,12">
-                            <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="Auto,*"
-                                  RowSpacing="12" ColumnSpacing="10">
-                                <!-- имя листа-источника -->
-                                <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
-                                       Text="{Binding ListLine}"
-                                       FontAttributes="Bold" FontSize="16" HorizontalOptions="Center" />
-                                <!-- пилюля Name (без чек-бокса) -->
-                                <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                                        StrokeShape="RoundRectangle 22" StrokeThickness="1.5" Stroke="#50000000"
-                                        Padding="14,8">
-                                    <Label Text="{Binding NameLine}"
-                                           FontAttributes="Bold" FontSize="15" HorizontalOptions="Center" />
+                        <!-- Свиток: золотая рамка, внутри пергамент -->
+                        <Border StrokeShape="RoundRectangle 5" StrokeThickness="2"
+                                Stroke="{StaticResource QuestGold}"
+                                Padding="0" Margin="0,0,0,12">
+                                <Border.Background>
+                                    <RadialGradientBrush Center="0.5,0.4" Radius="0.85">
+                                        <GradientStop Color="#F6EBD0" Offset="0.0" />
+                                        <GradientStop Color="#E7D6AE" Offset="0.6" />
+                                        <GradientStop Color="#D3BB8C" Offset="1.0" />
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                                
+                            <Grid>
+                                <Border StrokeShape="RoundRectangle 3" StrokeThickness="1"
+                                        Stroke="{StaticResource QuestGoldDim}"
+                                        BackgroundColor="Transparent"
+                                        Margin="4" Padding="12,10">
+                                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                                          ColumnDefinitions="Auto,*"
+                                          RowSpacing="8" ColumnSpacing="10">
+
+                                        <!-- Лист-источник -->
+                                        <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                                               Text="{Binding ListLine}"
+                                               FontFamily="{StaticResource SerifFont}"
+                                               TextColor="{StaticResource QuestInkSoft}"
+                                               CharacterSpacing="1" FontSize="11" />
+
+                                        <!-- Медальон «!» и название задания -->
+                                        <Image Grid.Row="1" Grid.Column="0" Source="questmark.png"
+                                               WidthRequest="34" HeightRequest="34" VerticalOptions="Start" />
+                                        <Label Grid.Row="1" Grid.Column="1"
+                                               Text="{Binding NameLine}"
+                                               FontFamily="{StaticResource SerifFont}"
+                                               TextColor="{StaticResource QuestInk}"
+                                               FontAttributes="Bold" FontSize="16"
+                                               VerticalOptions="Center" />
+
+                                        <!-- Разделитель -->
+                                        <BoxView Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                                 HeightRequest="1" Color="{StaticResource ParchmentEdge}" />
+
+                                        <!-- Текущая цель -->
+                                        <CheckBox Grid.Row="3" Grid.Column="0" IsChecked="False"
+                                                  Color="{StaticResource QuestInk}"
+                                                  VerticalOptions="Center"
+                                                  IsVisible="{Binding HasCurrentSubtask}"
+                                                  CheckedChanged="OnDailySubtaskChecked" />
+                                        <Label Grid.Row="3" Grid.Column="1"
+                                               Text="{Binding CurrentSubtaskText}"
+                                               FontFamily="{StaticResource SerifFont}"
+                                               TextColor="{StaticResource QuestInk}"
+                                               FontSize="14" VerticalOptions="Center"
+                                               IsVisible="{Binding HasCurrentSubtask}" />
+
+                                        <!-- Сроки и полоса прогресса -->
+                                        <VerticalStackLayout Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                                                             Spacing="4">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <Label Grid.Column="0" Text="{Binding DateRange}"
+                                                       FontFamily="{StaticResource SerifFont}"
+                                                       TextColor="{StaticResource QuestInkSoft}"
+                                                       FontSize="11" />
+                                                <Label Grid.Column="1" Text="{Binding ProgressText}"
+                                                       FontFamily="{StaticResource SerifFont}"
+                                                       TextColor="{StaticResource QuestInkSoft}"
+                                                       FontSize="11" FontAttributes="Bold" />
+                                            </Grid>
+                                            <Border StrokeShape="RoundRectangle 2" StrokeThickness="1"
+                                                    Stroke="{StaticResource ParchmentEdge}"
+                                                    BackgroundColor="#33000000"
+                                                    HeightRequest="8" Padding="0">
+                                                <ProgressBar
+                                                    Progress="{Binding Progress, Converter={StaticResource PercentToFraction}}"
+                                                    ProgressColor="{StaticResource QuestGold}"
+                                                    BackgroundColor="Transparent"
+                                                    VerticalOptions="Fill" />
+                                            </Border>
+                                        </VerticalStackLayout>
+                                    </Grid>
                                 </Border>
-                                <!-- текущее подзадание с чек-боксом -->
-                                <CheckBox Grid.Row="2" Grid.Column="0" IsChecked="False"
-                                          VerticalOptions="Center"
-                                          IsVisible="{Binding HasCurrentSubtask}"
-                                          CheckedChanged="OnDailySubtaskChecked" />
-                                <Label Grid.Row="2" Grid.Column="1"
-                                       Text="{Binding CurrentSubtaskText}"
-                                       FontSize="14" VerticalOptions="Center"
-                                       IsVisible="{Binding HasCurrentSubtask}" />
-                                <!-- даты + прогресс -->
-                                <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" ColumnDefinitions="*,Auto">
-                                    <Label Grid.Column="0" Text="{Binding DateRange}"
-                                           FontSize="12" FontAttributes="Bold" VerticalOptions="Center" />
-                                    <Label Grid.Column="1" Text="{Binding ProgressText}"
-                                           FontSize="12" FontAttributes="Bold" VerticalOptions="Center" />
-                                </Grid>
                             </Grid>
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <!-- Открытый лист: только задания этого листа -->
+            <!-- Открытый лист: задания этого листа -->
             <Grid Grid.Row="0" IsVisible="{Binding IsListOpen}">
-                <CollectionView ItemsSource="{Binding CurrentTasks}"
-                                SelectionMode="None">
+                <CollectionView ItemsSource="{Binding CurrentTasks}" SelectionMode="None">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="vm:TaskItemVM">
-                            <Border StrokeShape="RoundRectangle 16"
-                                    StrokeThickness="2"
-                                    Padding="12" Margin="0,0,0,10">
+                            <Border StrokeShape="RoundRectangle 5" StrokeThickness="2"
+                                    Padding="0" Margin="0,0,0,12">
+                                <Border.Background>
+                                    <RadialGradientBrush Center="0.5,0.4" Radius="0.85">
+                                        <GradientStop Color="#F6EBD0" Offset="0.0" />
+                                        <GradientStop Color="#E7D6AE" Offset="0.6" />
+                                        <GradientStop Color="#D3BB8C" Offset="1.0" />
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                                
                                 <Border.Triggers>
                                     <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                        <Setter Property="Stroke" Value="{StaticResource Primary}" />
+                                        <Setter Property="Stroke" Value="{StaticResource QuestGoldBright}" />
                                     </DataTrigger>
                                     <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="False">
-                                        <Setter Property="Stroke" Value="#50000000" />
+                                        <Setter Property="Stroke" Value="{StaticResource QuestGold}" />
                                     </DataTrigger>
                                 </Border.Triggers>
                                 <Border.GestureRecognizers>
@@ -162,48 +302,74 @@
                                         CommandParameter="{Binding .}" />
                                 </Border.GestureRecognizers>
 
-                                <!-- Единая сетка: левая колонка чек-боксов + контент -->
-                                <Grid RowDefinitions="Auto,Auto,Auto"
-                                      ColumnDefinitions="Auto,*"
-                                      RowSpacing="12" ColumnSpacing="10">
+                                <Grid>
+                                    <Border StrokeShape="RoundRectangle 3" StrokeThickness="1"
+                                            Stroke="{StaticResource QuestGoldDim}"
+                                            BackgroundColor="Transparent"
+                                            Margin="4" Padding="12,10">
+                                        <Grid RowDefinitions="Auto,Auto,Auto,Auto"
+                                              ColumnDefinitions="Auto,*"
+                                              RowSpacing="8" ColumnSpacing="10">
 
-                                    <!-- Пилюля с названием: чек-бокс ВНУТРИ овала слева + Name по центру -->
-                                    <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
-                                            StrokeShape="RoundRectangle 22"
-                                            StrokeThickness="1.5" Stroke="#50000000"
-                                            Padding="10,6">
-                                        <Grid>
-                                            <Label Text="{Binding NameLine}"
-                                                   FontAttributes="Bold" FontSize="15"
-                                                   HorizontalOptions="Center" VerticalOptions="Center" />
-                                            <CheckBox HorizontalOptions="Start" VerticalOptions="Center"
-                                                      IsChecked="{Binding InDailyPlan}"
-                                                      CheckedChanged="OnPlanChecked" />
+                                            <!-- Медальон «!», название и чек-бокс «взять на сегодня» -->
+                                            <Image Grid.Row="0" Grid.Column="0" Source="questmark.png"
+                                                   WidthRequest="34" HeightRequest="34" VerticalOptions="Start" />
+                                            <Grid Grid.Row="0" Grid.Column="1" ColumnDefinitions="*,Auto">
+                                                <Label Grid.Column="0"
+                                                       Text="{Binding NameLine}"
+                                                       FontFamily="{StaticResource SerifFont}"
+                                                       TextColor="{StaticResource QuestInk}"
+                                                       FontAttributes="Bold" FontSize="16"
+                                                       VerticalOptions="Center" />
+                                                <CheckBox Grid.Column="1"
+                                                          Color="{StaticResource QuestInk}"
+                                                          VerticalOptions="Center"
+                                                          IsChecked="{Binding InDailyPlan}"
+                                                          CheckedChanged="OnPlanChecked" />
+                                            </Grid>
+
+                                            <BoxView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                                     HeightRequest="1" Color="{StaticResource ParchmentEdge}" />
+
+                                            <!-- Текущая цель -->
+                                            <CheckBox Grid.Row="2" Grid.Column="0" IsChecked="False"
+                                                      Color="{StaticResource QuestInk}"
+                                                      VerticalOptions="Center"
+                                                      IsVisible="{Binding HasCurrentSubtask}"
+                                                      CheckedChanged="OnCurrentSubtaskChecked" />
+                                            <Label Grid.Row="2" Grid.Column="1"
+                                                   Text="{Binding CurrentSubtaskText}"
+                                                   FontFamily="{StaticResource SerifFont}"
+                                                   TextColor="{StaticResource QuestInk}"
+                                                   FontSize="14" VerticalOptions="Center"
+                                                   IsVisible="{Binding HasCurrentSubtask}" />
+
+                                            <!-- Сроки и полоса прогресса -->
+                                            <VerticalStackLayout Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                                                                 Spacing="4">
+                                                <Grid ColumnDefinitions="*,Auto">
+                                                    <Label Grid.Column="0" Text="{Binding DateRange}"
+                                                           FontFamily="{StaticResource SerifFont}"
+                                                           TextColor="{StaticResource QuestInkSoft}"
+                                                           FontSize="11" />
+                                                    <Label Grid.Column="1" Text="{Binding ProgressText}"
+                                                           FontFamily="{StaticResource SerifFont}"
+                                                           TextColor="{StaticResource QuestInkSoft}"
+                                                           FontSize="11" FontAttributes="Bold" />
+                                                </Grid>
+                                                <Border StrokeShape="RoundRectangle 2" StrokeThickness="1"
+                                                        Stroke="{StaticResource ParchmentEdge}"
+                                                        BackgroundColor="#33000000"
+                                                        HeightRequest="8" Padding="0">
+                                                    <ProgressBar
+                                                        Progress="{Binding Progress, Converter={StaticResource PercentToFraction}}"
+                                                        ProgressColor="{StaticResource QuestGold}"
+                                                        BackgroundColor="Transparent"
+                                                        VerticalOptions="Fill" />
+                                                </Border>
+                                            </VerticalStackLayout>
                                         </Grid>
                                     </Border>
-
-                                    <!-- Чек-бокс текущего подзадания (в той же левой колонке) -->
-                                    <CheckBox Grid.Row="1" Grid.Column="0" IsChecked="False"
-                                              VerticalOptions="Center"
-                                              IsVisible="{Binding HasCurrentSubtask}"
-                                              CheckedChanged="OnCurrentSubtaskChecked" />
-                                    <Label Grid.Row="1" Grid.Column="1"
-                                           Text="{Binding CurrentSubtaskText}"
-                                           FontSize="14" VerticalOptions="Center"
-                                           IsVisible="{Binding HasCurrentSubtask}" />
-
-                                    <!-- Нижняя строка (от левого края): даты слева, прогресс справа -->
-                                    <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                                          ColumnDefinitions="*,Auto">
-                                        <Label Grid.Column="0"
-                                               Text="{Binding DateRange}"
-                                               FontSize="12" FontAttributes="Bold"
-                                               VerticalOptions="Center" />
-                                        <Label Grid.Column="1"
-                                               Text="{Binding ProgressText}"
-                                               FontSize="12" FontAttributes="Bold"
-                                               VerticalOptions="Center" />
-                                    </Grid>
                                 </Grid>
                             </Border>
                         </DataTemplate>
@@ -212,37 +378,33 @@
             </Grid>
 
             <!-- Кнопки + / QUEST / – внизу среднего поля -->
-            <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,*,Auto" Margin="0,8,0,0">
+            <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,*,Auto" Margin="0,10,0,0">
                 <Button Grid.Column="0"
-                        Style="{StaticResource HoverButton}"
-                        Text="+" FontSize="34" FontAttributes="Bold"
-                        TextColor="#4CAF50"
-                        BackgroundColor="White"
-                        BorderColor="#30000000" BorderWidth="1"
-                        WidthRequest="76" HeightRequest="62" CornerRadius="14"
+                        Style="{StaticResource ActionButton}"
+                        Text="+" FontSize="30" FontAttributes="Bold"
+                        TextColor="{StaticResource QuestGreen}"
+                        WidthRequest="74"
                         Command="{Binding AddCommand}" />
                 <Button Grid.Column="2"
-                        Style="{StaticResource HoverButton}"
-                        Text="QUEST" FontSize="18" FontAttributes="Bold"
-                        TextColor="#F5A623"
-                        BackgroundColor="White"
-                        BorderColor="#30000000" BorderWidth="1"
-                        HeightRequest="62" CornerRadius="14" Padding="10,0"
+                        Style="{StaticResource ActionButton}"
+                        Text="QUEST" FontSize="17" FontAttributes="Bold"
+                        CharacterSpacing="2"
+                        TextColor="{StaticResource QuestGoldBright}"
+                        Padding="14,0"
                         Command="{Binding GoHomeCommand}" />
                 <Button Grid.Column="4"
-                        Style="{StaticResource HoverButton}"
-                        Text="–" FontSize="34" FontAttributes="Bold"
-                        TextColor="#E53935"
-                        BackgroundColor="White"
-                        BorderColor="#30000000" BorderWidth="1"
-                        WidthRequest="76" HeightRequest="62" CornerRadius="14"
+                        Style="{StaticResource ActionButton}"
+                        Text="–" FontSize="30" FontAttributes="Bold"
+                        TextColor="{StaticResource QuestRed}"
+                        WidthRequest="74"
                         Command="{Binding RemoveCommand}" />
             </Grid>
         </Grid>
 
-        <!-- НИЖНИЙ БЛОК: лента наслаивающихся вкладок листов -->
-        <Grid Grid.Row="2" HeightRequest="108" BackgroundColor="#F7F7F7">
-            <BoxView HeightRequest="1" Color="#30000000" VerticalOptions="Start" />
+        <!-- ============ НИЖНИЙ БЛОК: закладки листов ============ -->
+        <Grid Grid.Row="2" HeightRequest="106">
+            <BoxView HeightRequest="1" Color="{StaticResource QuestGold}"
+                     Opacity="0.7" VerticalOptions="Start" />
             <ScrollView Orientation="Horizontal"
                         HorizontalScrollBarVisibility="Always"
                         Padding="20,14">
@@ -250,17 +412,17 @@
                                        Spacing="0" VerticalOptions="Fill">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="vm:QuestTab">
-                            <Border StrokeShape="RoundRectangle 12,12,0,0"
-                                    StrokeThickness="1" Stroke="#40000000"
-                                    BackgroundColor="{Binding ColorHex}"
+                            <Border StrokeShape="RoundRectangle 8,8,0,0"
+                                    StrokeThickness="1" Stroke="{StaticResource QuestGoldDim}"
                                     WidthRequest="120"
                                     Margin="-14,0,0,0"
-                                    Padding="10">
+                                    BackgroundColor="{StaticResource Parchment}"
+                                    Padding="0">
                                 <Border.Triggers>
                                     <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
                                         <Setter Property="TranslationY" Value="-8" />
                                         <Setter Property="StrokeThickness" Value="2" />
-                                        <Setter Property="Stroke" Value="{StaticResource Primary}" />
+                                        <Setter Property="Stroke" Value="{StaticResource QuestGoldBright}" />
                                     </DataTrigger>
                                 </Border.Triggers>
                                 <Border.GestureRecognizers>
@@ -268,11 +430,15 @@
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=OpenTabCommand}"
                                         CommandParameter="{Binding .}" />
                                 </Border.GestureRecognizers>
-                                <Label Text="{Binding Name}"
-                                       TextColor="#222222"
-                                       FontSize="14" FontAttributes="Bold"
-                                       LineBreakMode="TailTruncation"
-                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                                <Grid>
+                                    <Label Text="{Binding Name}"
+                                           FontFamily="{StaticResource SerifFont}"
+                                           TextColor="{StaticResource QuestInk}"
+                                           FontSize="13" FontAttributes="Bold"
+                                           LineBreakMode="TailTruncation"
+                                           Margin="8"
+                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Grid>
                             </Border>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>

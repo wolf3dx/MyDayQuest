@@ -5,27 +5,47 @@
         x:DataType="vm:MainViewModel"
         Width="400" MinWidth="400" MaxWidth="400"
         Height="730"
-        Title="My Day Quest">
+        Title="My Day Quest"
+        Icon="/Assets/questmark.png"
+        FontFamily="Georgia, Times New Roman, serif"
+        Background="#15100A">
 
     <Window.Styles>
         <Style Selector="Button.header">
-            <Setter Property="CornerRadius" Value="10" />
-            <Setter Property="Foreground" Value="#222222" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="Height" Value="40" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Foreground" Value="#F2D48A" />
+            <Setter Property="Height" Value="36" />
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
-            <Setter Property="BorderBrush" Value="#40000000" />
+            <Setter Property="BorderBrush" Value="#D8A22A" />
             <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                        <GradientStop Color="#48381F" Offset="0" />
+                        <GradientStop Color="#221A0E" Offset="1" />
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style Selector="Button.header /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
         </Style>
         <Style Selector="Button.header:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#33512BD4" />
+            <Setter Property="Background" Value="#33D8A22A" />
         </Style>
         <Style Selector="Button.action">
-            <Setter Property="Background" Value="White" />
-            <Setter Property="BorderBrush" Value="#30000000" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="BorderBrush" Value="#D8A22A" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                        <GradientStop Color="#4A3920" Offset="0" />
+                        <GradientStop Color="#1E170D" Offset="1" />
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
             <Setter Property="Width" Value="76" />
             <Setter Property="Height" Value="60" />
             <Setter Property="FontSize" Value="30" />
@@ -33,13 +53,31 @@
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
+        <Style Selector="Button.action /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Button.action:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#33D8A22A" />
+        </Style>
+        <Style Selector="Button.tab">
+            <Setter Property="Background" Value="#EBDCB8" />
+            <Setter Property="BorderBrush" Value="#C9AE7B" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8,8,0,0" />
+        </Style>
     </Window.Styles>
 
-    <Grid RowDefinitions="Auto,*,Auto,Auto" Background="White">
+    <Grid RowDefinitions="Auto,*,Auto,Auto">
+        <Image Grid.Row="0" Grid.RowSpan="4" Source="/Assets/leatherbg.png" Stretch="UniformToFill" />
 
         <!-- ШАПКА -->
-        <Grid Grid.Row="0" Margin="10,8" RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
-            <TextBlock Grid.Row="0" Text="M.D.Q" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
+        <Grid Grid.Row="0" Margin="10,8" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="8">
+            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
+                <TextBlock Text="&#x25C6;" Foreground="#D8A22A" FontSize="11" VerticalAlignment="Center" Opacity="0.8" />
+                <TextBlock Text="M &#xB7; D &#xB7; Q" Foreground="#F2D48A" FontSize="22" FontWeight="Bold"
+                           VerticalAlignment="Center" />
+                <TextBlock Text="&#x25C6;" Foreground="#D8A22A" FontSize="11" VerticalAlignment="Center" Opacity="0.8" />
+            </StackPanel>
             <Image Grid.Row="0" Source="/Assets/update.png" Width="34" Height="34"
                    HorizontalAlignment="Left" IsVisible="{Binding IsUpdateAvailable}"
                    PointerPressed="OnUpdateClick" />
@@ -49,7 +87,16 @@
                 <Button Grid.Column="2" Classes="header" Content="Sync" Background="#FBF3D0" Click="OnSync" />
                 <Button Grid.Column="3" Classes="header" Content="About" Background="#DDEFD9" Click="OnAbout" />
             </Grid>
-            <Rectangle Grid.Row="2" Height="1" Fill="#30000000" />
+            <!-- Облако: подключение и состояние автосинхронизации -->
+            <Grid Grid.Row="2" ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                <Button Grid.Column="0" Classes="header" Content="Cloud" Background="#D5ECF7"
+                        Width="86" Click="OnCloud" />
+                <TextBlock Grid.Column="1" Text="{Binding CloudStatus}"
+                           Foreground="#F2D48A" FontSize="11" Opacity="0.7" TextTrimming="CharacterEllipsis"
+                           VerticalAlignment="Center" />
+            </Grid>
+
+            <Rectangle Grid.Row="3" Height="1" Fill="#D8A22A" Opacity="0.85" />
         </Grid>
 
         <!-- СРЕДНЕЕ ПОЛЕ -->
@@ -57,25 +104,29 @@
             <!-- Главное окно: дневной план -->
             <ScrollViewer IsVisible="{Binding IsHomeVisible}">
                 <StackPanel>
-                    <TextBlock Text="Отметьте чек-бокс у названия задания в листе, чтобы оно появилось здесь."
-                               Foreground="#70000000" TextWrapping="Wrap" TextAlignment="Center"
+                    <TextBlock Text="Журнал заданий пуст. Отметьте задание в листе — и оно появится здесь."
+                               Foreground="#F2D48A" Opacity="0.5" TextWrapping="Wrap" TextAlignment="Center"
                                Margin="8,40" IsVisible="{Binding DailyItems.Count, Converter={x:Static vm:Conv.IsZero}}" />
                     <ItemsControl ItemsSource="{Binding DailyItems}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:DailyCardVM">
-                                <Border BorderBrush="#50000000" BorderThickness="2" CornerRadius="16" Padding="12" Margin="0,0,0,12">
-                                    <StackPanel Spacing="10">
-                                        <TextBlock Text="{Binding ListLine}" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center" />
-                                        <Border BorderBrush="#50000000" BorderThickness="1.5" CornerRadius="22" Padding="14,8">
-                                            <TextBlock Text="{Binding NameLine}" FontWeight="Bold" HorizontalAlignment="Center" />
-                                        </Border>
+                                <Border BorderBrush="#D8A22A" BorderThickness="2" CornerRadius="5"
+                                        Background="#EBDCB8" Padding="10" Margin="0,0,0,12">
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Text="{Binding ListLine}" Foreground="#6B5537" FontSize="11" />
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                            <Image Grid.Column="0" Source="/Assets/questmark.png" Width="34" Height="34" />
+                                            <TextBlock Grid.Column="1" Text="{Binding NameLine}" Foreground="#2A1F12"
+                                                       FontWeight="Bold" FontSize="16" VerticalAlignment="Center" />
+                                        </Grid>
+                                        <Rectangle Height="1" Fill="#C9AE7B" />
                                         <Grid ColumnDefinitions="Auto,*" IsVisible="{Binding HasCurrentSubtask}">
                                             <CheckBox Grid.Column="0" IsChecked="False" IsCheckedChanged="OnDailySubtaskChecked" Tag="{Binding}" />
-                                            <TextBlock Grid.Column="1" Text="{Binding CurrentSubtaskText}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" Text="{Binding CurrentSubtaskText}" Foreground="#2A1F12" VerticalAlignment="Center" />
                                         </Grid>
                                         <Grid ColumnDefinitions="*,Auto">
-                                            <TextBlock Grid.Column="0" Text="{Binding DateRange}" FontWeight="Bold" FontSize="12" />
-                                            <TextBlock Grid.Column="1" Text="{Binding ProgressText}" FontWeight="Bold" FontSize="12" />
+                                            <TextBlock Grid.Column="0" Text="{Binding DateRange}" Foreground="#6B5537" FontSize="11" />
+                                            <TextBlock Grid.Column="1" Text="{Binding ProgressText}" Foreground="#6B5537" FontWeight="Bold" FontSize="11" />
                                         </Grid>
                                     </StackPanel>
                                 </Border>
@@ -90,24 +141,25 @@
                 <ItemsControl ItemsSource="{Binding CurrentTasks}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="vm:TaskCardVM">
-                            <Border BorderThickness="2" CornerRadius="16" Padding="12" Margin="0,0,0,10"
+                            <Border BorderThickness="2" CornerRadius="5" Background="#EBDCB8" Padding="10" Margin="0,0,0,12"
                                     BorderBrush="{Binding IsSelected, Converter={x:Static vm:Conv.SelBrush}}"
                                     Tapped="OnTaskTapped" DoubleTapped="OnTaskDoubleTapped" Tag="{Binding}">
-                                <StackPanel Spacing="12">
-                                    <Border BorderBrush="#50000000" BorderThickness="1.5" CornerRadius="22" Padding="10,6">
-                                        <Grid>
-                                            <TextBlock Text="{Binding NameLine}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                            <CheckBox HorizontalAlignment="Left" IsChecked="{Binding InDailyPlan, Mode=TwoWay}"
-                                                      IsCheckedChanged="OnPlanChecked" Tag="{Binding}" />
-                                        </Grid>
-                                    </Border>
+                                <StackPanel Spacing="8">
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                        <Image Grid.Column="0" Source="/Assets/questmark.png" Width="34" Height="34" />
+                                        <TextBlock Grid.Column="1" Text="{Binding NameLine}" Foreground="#2A1F12"
+                                                   FontWeight="Bold" FontSize="16" VerticalAlignment="Center" />
+                                        <CheckBox Grid.Column="2" IsChecked="{Binding InDailyPlan, Mode=TwoWay}"
+                                                  IsCheckedChanged="OnPlanChecked" Tag="{Binding}" />
+                                    </Grid>
+                                    <Rectangle Height="1" Fill="#C9AE7B" />
                                     <Grid ColumnDefinitions="Auto,*" IsVisible="{Binding HasCurrentSubtask}">
                                         <CheckBox Grid.Column="0" IsChecked="False" IsCheckedChanged="OnTaskSubtaskChecked" Tag="{Binding}" />
-                                        <TextBlock Grid.Column="1" Text="{Binding CurrentSubtaskText}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding CurrentSubtaskText}" Foreground="#2A1F12" VerticalAlignment="Center" />
                                     </Grid>
                                     <Grid ColumnDefinitions="*,Auto">
-                                        <TextBlock Grid.Column="0" Text="{Binding DateRange}" FontWeight="Bold" FontSize="12" />
-                                        <TextBlock Grid.Column="1" Text="{Binding ProgressText}" FontWeight="Bold" FontSize="12" />
+                                        <TextBlock Grid.Column="0" Text="{Binding DateRange}" Foreground="#6B5537" FontSize="11" />
+                                        <TextBlock Grid.Column="1" Text="{Binding ProgressText}" Foreground="#6B5537" FontWeight="Bold" FontSize="11" />
                                     </Grid>
                                 </StackPanel>
                             </Border>
@@ -119,13 +171,13 @@
 
         <!-- НИЖНЯЯ ПАНЕЛЬ + / QUEST / - -->
         <Grid Grid.Row="2" Margin="16,4" ColumnDefinitions="Auto,*,Auto,*,Auto">
-            <Button Grid.Column="0" Classes="action" Content="+" Foreground="#4CAF50" Command="{Binding AddCommand}" />
-            <Button Grid.Column="2" Classes="action" Content="QUEST" FontSize="18" Foreground="#F5A623" Width="110" Command="{Binding GoHomeCommand}" />
-            <Button Grid.Column="4" Classes="action" Content="–" Foreground="#E53935" Command="{Binding RemoveCommand}" />
+            <Button Grid.Column="0" Classes="action" Content="+" Foreground="#5FB13A" Command="{Binding AddCommand}" />
+            <Button Grid.Column="2" Classes="action" Content="QUEST" FontSize="17" Foreground="#F2D48A" Width="110" Command="{Binding GoHomeCommand}" />
+            <Button Grid.Column="4" Classes="action" Content="–" Foreground="#C0392B" Command="{Binding RemoveCommand}" />
         </Grid>
 
         <!-- ЛЕНТА ВКЛАДОК -->
-        <Border Grid.Row="3" Background="#F7F7F7" Height="96" BorderBrush="#30000000" BorderThickness="0,1,0,0">
+        <Border Grid.Row="3" Background="#1E1710" Height="96" BorderBrush="#D8A22A" BorderThickness="0,1,0,0">
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Padding="20,12">
                 <ItemsControl ItemsSource="{Binding Tabs}">
                     <ItemsControl.ItemsPanel>
@@ -133,11 +185,11 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="vm:QuestTabVM">
-                            <Button Width="120" Height="60" Margin="-14,0,0,0" Padding="8"
+                            <Button Classes="tab" Width="120" Height="60" Margin="-14,0,0,0" Padding="8"
                                     Background="{Binding ColorHex}"
                                     Command="{Binding ((vm:MainViewModel)DataContext).OpenTabCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                     CommandParameter="{Binding}">
-                                <TextBlock Text="{Binding Name}" Foreground="#222222" FontWeight="Bold"
+                                <TextBlock Text="{Binding Name}" Foreground="#2A1F12" FontWeight="Bold"
                                            TextTrimming="CharacterEllipsis" HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Button>
                         </DataTemplate>

@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using MyDayQuest.Models;
@@ -20,9 +21,11 @@ public class SyncService
 
     // ---- Сериализация ----
 
-    public async Task<string> ExportJsonAsync()
+    /// <param name="exportedUtc">Штамп времени внутри файла. Для подсчёта отпечатка
+    /// содержимого передают одно и то же значение, чтобы штамп на него не влиял.</param>
+    public async Task<string> ExportJsonAsync(DateTime? exportedUtc = null)
     {
-        var file = new SyncFile { ExportedUtc = DateTime.UtcNow };
+        var file = new SyncFile { ExportedUtc = exportedUtc ?? DateTime.UtcNow };
         var quests = await _db.GetQuestsAsync();
         var allTasks = await _db.GetAllTasksAsync();
         var allSubs = await _db.GetAllSubtasksAsync();
@@ -97,6 +100,20 @@ public class SyncService
                 }
             }
         }
+    }
+
+    /// <summary>Отпечаток данных без учёта времени экспорта — «изменилось ли содержимое».</summary>
+    public async Task<string> ContentHashAsync()
+    {
+        var json = await ExportJsonAsync(DateTime.MinValue);
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(json)));
+    }
+
+    /// <summary>Время экспорта, записанное внутри JSON-содержимого.</summary>
+    public static DateTime? ReadExportedUtc(string json)
+    {
+        try { return JsonSerializer.Deserialize<SyncFile>(json)?.ExportedUtc; }
+        catch { return null; }
     }
 
     // ---- Файл ----

@@ -3,6 +3,7 @@ using System.Text;
 using CommunityToolkit.Maui.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MyDayQuest.Cloud;
 using MyDayQuest.Data;
 using MyDayQuest.Models;
 using MyDayQuest.Views;
@@ -14,6 +15,7 @@ public partial class MainViewModel : ObservableObject
     private readonly AppDatabase _db;
     private readonly SyncService _sync;
     private readonly UpdateService _update;
+    private readonly CloudSyncManager _cloud;
     private UpdateInfo? _pendingUpdate;
 
     private const string SyncPathKey = "SyncFilePath";
@@ -32,14 +34,25 @@ public partial class MainViewModel : ObservableObject
     // Пастельная палитра для карточек-вкладок (по кругу).
     private static readonly string[] Palette =
     {
-        "#EDEDED", "#DCE7F5", "#DDEFD9", "#F5E6D6", "#F0DDE9", "#E5E0F5", "#FDF3D0",
+        "#EBDCB8", "#E0CDA0", "#D5BE8C", "#F0E3C4", "#DCC79C", "#E6D5AE", "#CBB183",
     };
 
-    public MainViewModel(AppDatabase db, SyncService sync, UpdateService update)
+    public MainViewModel(AppDatabase db, SyncService sync, UpdateService update, CloudSyncManager cloud)
     {
         _db = db;
         _sync = sync;
         _update = update;
+        _cloud = cloud;
+
+        _cloudStatus = _cloud.StatusText;
+        _cloud.StatusChanged += (_, _) =>
+            MainThread.BeginInvokeOnMainThread(() => CloudStatus = _cloud.StatusText);
+        _cloud.PulledFromCloud += (_, _) =>
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                Collapse();
+                await LoadAsync();
+            });
     }
 
     /// <summary>Ленты листов внизу.</summary>
@@ -551,6 +564,102 @@ public partial class MainViewModel : ObservableObject
         catch (Exception ex)
         {
             await Shell.Current.DisplayAlertAsync("Ошибка синхронизации", ex.Message, "OK");
+        }
+    }
+
+    // ---- Облако: подключение и автоматическая выгрузка файла данных ----
+
+    /// <summary>Строка состояния под кнопками («Яндекс.Диск: синхронизировано 27.09 18:40»).</summary>
+    [ObservableProperty]
+    private string _cloudStatus = string.Empty;
+
+    /// <summary>Поднять фоновую синхронизацию при показе главного экрана.</summary>
+    public async Task StartCloudSyncAsync()
+    {
+        _cloud.Start();
+        if (_cloud.IsEnabled)
+            await _cloud.SyncNowAsync(force: true);
+        CloudStatus = _cloud.StatusText;
+    }
+
+    /// <summary>Меню облака: подключить провайдера, синхронизировать вручную, отключить.</summary>
+    [RelayCommand]
+    private async Task CloudAsync()
+    {
+        var options = new List<string>();
+        if (_cloud.IsEnabled)
+        {
+            options.Add("Синхронизировать сейчас");
+            options.Add("Отключить облако");
+        }
+        options.Add("Подключить Яндекс.Диск");
+        options.Add("Подключить OneDrive");
+        options.Add("Подключить Google Drive");
+
+        var choice = await Shell.Current.DisplayActionSheetAsync(
+            _cloud.StatusText, "Отмена", null, options.ToArray());
+
+        switch (choice)
+        {
+            case "Синхронизировать сейчас":
+                var report = await _cloud.SyncNowAsync(force: true);
+                CloudStatus = _cloud.StatusText;
+                await Shell.Current.DisplayAlertAsync("Облако", report.Message, "OK");
+                break;
+
+            case "Отключить облако":
+                if (await Shell.Current.DisplayAlertAsync("Облако",
+                        "Отключить облако? Файл в облаке останется, приложение перестанет его обновлять.",
+                        "Отключить", "Отмена"))
+                {
+                    _cloud.Disconnect();
+                    CloudStatus = _cloud.StatusText;
+                }
+                break;
+
+            case "Подключить Яндекс.Диск":
+                await ConnectCloudAsync(CloudProvider.YandexDisk);
+                break;
+            case "Подключить OneDrive":
+                await ConnectCloudAsync(CloudProvider.OneDrive);
+                break;
+            case "Подключить Google Drive":
+                await ConnectCloudAsync(CloudProvider.GoogleDrive);
+                break;
+        }
+    }
+
+    private async Task ConnectCloudAsync(CloudProvider provider)
+    {
+        if (!_cloud.IsConfigured(provider))
+        {
+            await Shell.Current.DisplayAlertAsync("Облако",
+                $"Для «{provider.Display()}» не задан client_id.\n\n" +
+                $"Создайте файл {CloudConfig.FileName} рядом с приложением " +
+                "по образцу cloud.config.sample.json.", "OK");
+            return;
+        }
+
+        try
+        {
+            CloudStatus = $"{provider.Display()}: вход…";
+            var report = await _cloud.ConnectAsync(provider);
+            CloudStatus = _cloud.StatusText;
+
+            if (report.Outcome == CloudSyncOutcome.Pulled)
+            {
+                Collapse();
+                await LoadAsync();
+            }
+
+            await Shell.Current.DisplayAlertAsync("Облако подключено",
+                $"{report.Message}\n\nФайл данных: {_cloud.Storage?.RemoteLocation}\n" +
+                "Дальше приложение обновляет его само.", "OK");
+        }
+        catch (Exception ex)
+        {
+            CloudStatus = _cloud.StatusText;
+            await Shell.Current.DisplayAlertAsync("Не удалось подключить облако", ex.Message, "OK");
         }
     }
 }

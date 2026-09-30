@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MyDayQuest.Cloud;
 using MyDayQuest.Data;
 using MyDayQuest.Models;
 
@@ -15,11 +16,12 @@ public partial class MainViewModel : ObservableObject
     private readonly AppDatabase _db;
     private readonly SyncService _sync;
     private readonly UpdateService _update;
+    private readonly CloudSyncManager _cloud;
     private UpdateInfo? _pendingUpdate;
 
     private static readonly string[] Palette =
     {
-        "#EDEDED", "#DCE7F5", "#DDEFD9", "#F5E6D6", "#F0DDE9", "#E5E0F5", "#FDF3D0",
+        "#EBDCB8", "#E0CDA0", "#D5BE8C", "#F0E3C4", "#DCC79C", "#E6D5AE", "#CBB183",
     };
 
     // Взаимодействия с UI (устанавливает View).
@@ -28,11 +30,67 @@ public partial class MainViewModel : ObservableObject
     public Func<string, Task>? Alert;
     public Func<int, Task>? OpenTaskDetail;
 
-    public MainViewModel(AppDatabase db, SyncService sync, UpdateService update)
+    public MainViewModel(AppDatabase db, SyncService sync, UpdateService update, CloudSyncManager cloud)
     {
         _db = db;
         _sync = sync;
         _update = update;
+        _cloud = cloud;
+
+        _cloudStatus = _cloud.StatusText;
+        _cloud.StatusChanged += (_, _) =>
+            global::Avalonia.Threading.Dispatcher.UIThread.Post(() => CloudStatus = _cloud.StatusText);
+        _cloud.PulledFromCloud += (_, _) =>
+            global::Avalonia.Threading.Dispatcher.UIThread.Post(async () =>
+            {
+                Collapse();
+                await LoadAsync();
+            });
+    }
+
+    // ---- Облако ----
+
+    /// <summary>Строка состояния под кнопками шапки.</summary>
+    [ObservableProperty]
+    private string _cloudStatus = string.Empty;
+
+    public bool IsCloudEnabled => _cloud.IsEnabled;
+    public string CloudStatusText => _cloud.StatusText;
+    public string? CloudLocation => _cloud.Storage?.RemoteLocation;
+    public bool IsCloudConfigured(CloudProvider provider) => _cloud.IsConfigured(provider);
+
+    /// <summary>Поднять фоновую синхронизацию при открытии окна.</summary>
+    public async Task StartCloudSyncAsync()
+    {
+        _cloud.Start();
+        if (_cloud.IsEnabled)
+            await _cloud.SyncNowAsync(force: true);
+        CloudStatus = _cloud.StatusText;
+    }
+
+    public async Task<CloudSyncReport> ConnectCloudAsync(CloudProvider provider)
+    {
+        var report = await _cloud.ConnectAsync(provider);
+        CloudStatus = _cloud.StatusText;
+        if (report.Outcome == CloudSyncOutcome.Pulled)
+        {
+            Collapse();
+            await LoadAsync();
+        }
+        return report;
+    }
+
+    public async Task<CloudSyncReport> SyncCloudNowAsync()
+    {
+        var report = await _cloud.SyncNowAsync(force: true);
+        CloudStatus = _cloud.StatusText;
+        return report;
+    }
+
+    public void DisconnectCloud()
+    {
+        _cloud.Disconnect();
+        CloudStatus = _cloud.StatusText;
     }
 
     // Взаимодействия для обновления (устанавливает View).

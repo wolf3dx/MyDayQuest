@@ -43,6 +43,23 @@ public static class Dialogs
         await dlg.ShowDialog(owner);
     }
 
+    /// <summary>Выбор одного пункта из списка (заменяет ActionSheet из MAUI).</summary>
+    public static async Task<string?> ChooseAsync(Window owner, string title, params string[] options)
+    {
+        var list = new ListBox { Margin = new(0, 10), MaxHeight = 260 };
+        foreach (var option in options) list.Items.Add(option);
+
+        var ok = new Button { Content = "OK", IsDefault = true, MinWidth = 90 };
+        var cancel = new Button { Content = "Отмена", IsCancel = true, MinWidth = 90 };
+        string? result = null;
+        var dlg = BuildDialog(title, list, ok, cancel, out var close);
+        list.DoubleTapped += (_, _) => { result = list.SelectedItem as string; close(); };
+        ok.Click += (_, _) => { result = list.SelectedItem as string; close(); };
+        cancel.Click += (_, _) => { result = null; close(); };
+        await dlg.ShowDialog(owner);
+        return result;
+    }
+
     private static Window BuildDialog(string title, Control content, Button primary, Button? secondary, out System.Action close)
     {
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, HorizontalAlignment = HorizontalAlignment.Right };

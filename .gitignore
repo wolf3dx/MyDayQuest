@@ -12,8 +12,13 @@
 
 # Распакованные сборки: в git идёт только упакованный архив актуальной версии
 Release/win-x64/
+Release/win-arm64/
 Release/linux-x64/
+Release/linux-arm64/
 Release/**/publish/
+
+# Прошлые версии: остаются на диске, но мимо git (базовое правило 13)
+Release/Архив/
 
 # ---- Секреты (в репозиторий не попадают) ----
 *.token
@@ -30,3 +35,7 @@ Thumbs.db
 
 # Временные файлы Visio/Office рядом с макетами
 ~$*
+
+# Настройки облаков и выданные токены (client_id/секреты — только локально)
+cloud.config.json
+cloud-tokens.json

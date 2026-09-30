@@ -30,20 +30,35 @@ jobs:
       - name: Install MAUI workloads
         run: dotnet workload install maui
 
-      - name: Build MacCatalyst (.app, unsigned)
+      # Базовое правило 9: обе архитектуры — x64 и ARM64 (Apple Silicon).
+      - name: Build MacCatalyst x64 (.app, unsigned)
         run: >
           dotnet publish Source/MyDayQuest/MyDayQuest.csproj
           -f net10.0-maccatalyst -c Release
+          -p:RuntimeIdentifier=maccatalyst-x64
           -p:CreatePackage=false -p:EnableCodeSigning=false
-          -o artifacts/maccatalyst
+          -o artifacts/maccatalyst-x64
+
+      - name: Build MacCatalyst ARM64 (.app, unsigned)
+        run: >
+          dotnet publish Source/MyDayQuest/MyDayQuest.csproj
+          -f net10.0-maccatalyst -c Release
+          -p:RuntimeIdentifier=maccatalyst-arm64
+          -p:CreatePackage=false -p:EnableCodeSigning=false
+          -o artifacts/maccatalyst-arm64
 
       - name: Package MacCatalyst .app
         run: |
-          cd artifacts/maccatalyst
-          APP=$(ls -d *.app | head -1)
-          if [ -n "$APP" ]; then
-            zip -ry ../MyDayQuest-macos.zip "$APP"
-          fi
+          for ARCH in x64 arm64; do
+            DIR="artifacts/maccatalyst-$ARCH"
+            APP=$(ls -d "$DIR"/*.app 2>/dev/null | head -1)
+            if [ -n "$APP" ]; then
+              (cd "$DIR" && zip -qry "../MyDayQuest-macos-$ARCH.zip" "$(basename "$APP")")
+              echo "macOS $ARCH: готов"
+            else
+              echo "macOS $ARCH: .app не найден"; exit 1
+            fi
+          done
 
       - name: Build iOS device (unsigned) and package IPA for AltStore
         run: |
@@ -69,6 +84,7 @@ jobs:
         with:
           name: apple-builds
           path: |
-            artifacts/MyDayQuest-macos.zip
+            artifacts/MyDayQuest-macos-x64.zip
+            artifacts/MyDayQuest-macos-arm64.zip
             artifacts/MyDayQuest-ios-unsigned.ipa
           if-no-files-found: warn

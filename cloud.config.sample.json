@@ -1,0 +1,28 @@
+{
+  "_readme": [
+    "Скопируйте этот файл в cloud.config.json рядом с исполняемым файлом приложения",
+    "(или в каталог данных приложения) и впишите свои client_id.",
+    "В репозиторий cloud.config.json не попадает — он в .gitignore.",
+    "Вместо файла можно задать переменные окружения:",
+    "MDQ_YANDEX_CLIENT_ID, MDQ_ONEDRIVE_CLIENT_ID, MDQ_GOOGLE_CLIENT_ID,",
+    "MDQ_GOOGLE_CLIENT_SECRET, MDQ_*_REDIRECT_URI."
+  ],
+  "Yandex": {
+    "ClientId": "",
+    "ClientSecret": "",
+    "DesktopRedirectUri": "http://127.0.0.1:52411/",
+    "MobileRedirectUri": "mydayquest://auth"
+  },
+  "OneDrive": {
+    "ClientId": "",
+    "ClientSecret": "",
+    "DesktopRedirectUri": "http://127.0.0.1:52411/",
+    "MobileRedirectUri": "mydayquest://auth"
+  },
+  "Google": {
+    "ClientId": "",
+    "ClientSecret": "",
+    "DesktopRedirectUri": "http://127.0.0.1:52411/",
+    "MobileRedirectUri": "mydayquest://auth"
+  }
+}
