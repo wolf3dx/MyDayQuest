@@ -431,13 +431,16 @@
                                         CommandParameter="{Binding .}" />
                                 </Border.GestureRecognizers>
                                 <Grid>
+                                    <!-- Fill + выравнивание по центру: иначе на Android длинное
+                                         название не обрезается, а вылезает за края закладки. -->
                                     <Label Text="{Binding Name}"
                                            FontFamily="{StaticResource SerifFont}"
                                            TextColor="{StaticResource QuestInk}"
                                            FontSize="13" FontAttributes="Bold"
                                            LineBreakMode="TailTruncation"
-                                           Margin="8"
-                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                                           WidthRequest="104"
+                                           HorizontalOptions="Center" VerticalOptions="Center"
+                                           HorizontalTextAlignment="Center" />
                                 </Grid>
                             </Border>
                         </DataTemplate>

@@ -39,3 +39,8 @@ Thumbs.db
 # Настройки облаков и выданные токены (client_id/секреты — только локально)
 cloud.config.json
 cloud-tokens.json
+
+# Ключ подписи Android и пароли к нему
+*.keystore
+*.jks
+android-signing.props
