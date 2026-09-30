@@ -1,8 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+	<!-- Ключ подписи Android-выпуска. Файла нет в репозитории:
+	     без него собирается отладочная подпись, с ним — выпускная. -->
+	<Import Project="$(MSBuildThisFileDirectory)..\..\android-signing.props"
+	        Condition="Exists('$(MSBuildThisFileDirectory)..\..\android-signing.props')" />
+
 	<PropertyGroup>
 		<TargetFrameworks>net10.0-android</TargetFrameworks>
-		<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
+		<!-- Apple-SDK закреплён на ветке 26.x: SDK 27.0 требует Xcode 27, которого
+	     нет ни на раннерах GitHub, ни в наличии у нас. -->
+		<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net10.0-ios26.0;net10.0-maccatalyst26.0</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
 
 		<!-- Note for MacCatalyst:
