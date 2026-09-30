@@ -19,7 +19,12 @@
 		<!-- Выпускной APK — только arm64-v8a: это все современные телефоны.
 		     x86_64 нужен лишь эмулятору и собирается отдельным пакетом,
 		     иначе телефон качает и распаковывает вдвое больше. -->
-		<RuntimeIdentifiers Condition="'$(TargetFramework)' == 'net10.0-android' and '$(Configuration)' == 'Release'">android-arm64</RuntimeIdentifiers>
+		<!-- Архитектуру релизного APK можно переопределить своим свойством:
+		     dotnet publish -p:AndroidAbi=android-x64 (пакет для эмулятора).
+		     Штатный RuntimeIdentifiers с командной строки задавать нельзя —
+		     он протекает в MyDayQuest.Core и ломает сборку (MSB3030). -->
+		<AndroidAbi Condition="'$(AndroidAbi)' == ''">android-arm64</AndroidAbi>
+		<RuntimeIdentifiers Condition="'$(TargetFramework)' == 'net10.0-android' and '$(Configuration)' == 'Release'">$(AndroidAbi)</RuntimeIdentifiers>
 
 		<!-- Note for MacCatalyst:
 		The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
