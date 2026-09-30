@@ -80,6 +80,19 @@ public partial class MainViewModel : ObservableObject
         return report;
     }
 
+    /// <summary>Подключение по логину и паролю (WebDAV) — без регистрации приложения.</summary>
+    public async Task<CloudSyncReport> ConnectWebDavAsync(string server, string user, string password)
+    {
+        var report = await _cloud.ConnectWebDavAsync(server, user, password);
+        CloudStatus = _cloud.StatusText;
+        if (report.Outcome == CloudSyncOutcome.Pulled)
+        {
+            Collapse();
+            await LoadAsync();
+        }
+        return report;
+    }
+
     public async Task<CloudSyncReport> SyncCloudNowAsync()
     {
         var report = await _cloud.SyncNowAsync(force: true);

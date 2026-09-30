@@ -12,6 +12,9 @@ public enum CloudProvider
     YandexDisk = 2,
     OneDrive = 3,
     GoogleDrive = 4,
+
+    /// <summary>Любой WebDAV-сервер: вход логином и паролем, без регистрации приложения.</summary>
+    WebDav = 5,
 }
 
 public static class CloudProviderNames
@@ -22,6 +25,7 @@ public static class CloudProviderNames
         CloudProvider.YandexDisk => "Яндекс.Диск",
         CloudProvider.OneDrive => "OneDrive",
         CloudProvider.GoogleDrive => "Google Drive",
+        CloudProvider.WebDav => "WebDAV (логин и пароль)",
         _ => "Выключено",
     };
 }

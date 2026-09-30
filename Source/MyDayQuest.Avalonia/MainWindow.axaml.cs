@@ -163,6 +163,8 @@ public partial class MainWindow : Window
             options.Add("Синхронизировать сейчас");
             options.Add("Отключить облако");
         }
+        options.Add("Яндекс.Диск по паролю (WebDAV)");
+        options.Add("Другой WebDAV-сервер");
         options.Add("Подключить Яндекс.Диск");
         options.Add("Подключить OneDrive");
         options.Add("Подключить Google Drive");
@@ -181,6 +183,12 @@ public partial class MainWindow : Window
                     _vm.DisconnectCloud();
                 break;
 
+            case "Яндекс.Диск по паролю (WebDAV)":
+                await ConnectWebDavAsync(WebDavStorage.YandexServer);
+                break;
+            case "Другой WebDAV-сервер":
+                await ConnectWebDavAsync(null);
+                break;
             case "Подключить Яндекс.Диск":
                 await ConnectCloudAsync(CloudProvider.YandexDisk);
                 break;
@@ -190,6 +198,35 @@ public partial class MainWindow : Window
             case "Подключить Google Drive":
                 await ConnectCloudAsync(CloudProvider.GoogleDrive);
                 break;
+        }
+    }
+
+    /// <summary>Мастер подключения по логину и паролю.</summary>
+    private async Task ConnectWebDavAsync(string? presetServer)
+    {
+        try
+        {
+            var server = presetServer;
+            if (server is null)
+            {
+                server = await Dialogs.PromptAsync(this, "WebDAV: адрес сервера", "https://example.com/dav");
+                if (string.IsNullOrWhiteSpace(server)) return;
+            }
+
+            var login = await Dialogs.PromptAsync(this, "WebDAV: логин", "user");
+            if (string.IsNullOrWhiteSpace(login)) return;
+
+            var password = await Dialogs.PromptAsync(this,
+                "WebDAV: пароль (при двухфакторной проверке — пароль приложения)", "пароль");
+            if (string.IsNullOrWhiteSpace(password)) return;
+
+            var report = await _vm.ConnectWebDavAsync(server, login, password);
+            await Dialogs.AlertAsync(this, "Облако подключено",
+                $"{report.Message} Файл данных: {_vm.CloudLocation}. Дальше приложение обновляет его само.");
+        }
+        catch (Exception ex)
+        {
+            await Dialogs.AlertAsync(this, "Не удалось подключить облако", ex.Message);
         }
     }
 

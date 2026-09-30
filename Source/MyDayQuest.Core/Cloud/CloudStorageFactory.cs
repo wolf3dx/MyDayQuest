@@ -21,8 +21,11 @@ public class CloudStorageFactory
         CloudProvider.YandexDisk => new YandexDiskStorage(_http, _config.Yandex, _tokens, _browser),
         CloudProvider.OneDrive => new OneDriveStorage(_http, _config.OneDrive, _tokens, _browser),
         CloudProvider.GoogleDrive => new GoogleDriveStorage(_http, _config.Google, _tokens, _browser),
+        CloudProvider.WebDav => new WebDavStorage(_http, _tokens),
         _ => null,
     };
 
-    public bool IsConfigured(CloudProvider provider) => _config.For(provider).IsConfigured;
+    /// <summary>WebDAV не требует регистрации приложения — он настроен всегда.</summary>
+    public bool IsConfigured(CloudProvider provider) =>
+        provider == CloudProvider.WebDav || _config.For(provider).IsConfigured;
 }

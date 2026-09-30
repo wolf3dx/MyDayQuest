@@ -592,6 +592,8 @@ public partial class MainViewModel : ObservableObject
             options.Add("Синхронизировать сейчас");
             options.Add("Отключить облако");
         }
+        options.Add("Яндекс.Диск по паролю (WebDAV)");
+        options.Add("Другой WebDAV-сервер");
         options.Add("Подключить Яндекс.Диск");
         options.Add("Подключить OneDrive");
         options.Add("Подключить Google Drive");
@@ -617,6 +619,12 @@ public partial class MainViewModel : ObservableObject
                 }
                 break;
 
+            case "Яндекс.Диск по паролю (WebDAV)":
+                await ConnectWebDavAsync(WebDavStorage.YandexServer);
+                break;
+            case "Другой WebDAV-сервер":
+                await ConnectWebDavAsync(null);
+                break;
             case "Подключить Яндекс.Диск":
                 await ConnectCloudAsync(CloudProvider.YandexDisk);
                 break;
@@ -626,6 +634,53 @@ public partial class MainViewModel : ObservableObject
             case "Подключить Google Drive":
                 await ConnectCloudAsync(CloudProvider.GoogleDrive);
                 break;
+        }
+    }
+
+    /// <summary>
+    /// Подключение по логину и паролю: регистрировать приложение у провайдера не нужно.
+    /// Для Яндекса адрес сервера подставляем сами.
+    /// </summary>
+    private async Task ConnectWebDavAsync(string? presetServer)
+    {
+        try
+        {
+            var server = presetServer;
+            if (server is null)
+            {
+                server = await Shell.Current.DisplayPromptAsync("WebDAV",
+                    "Адрес сервера", "Далее", "Отмена", "https://example.com/dav");
+                if (string.IsNullOrWhiteSpace(server)) return;
+            }
+
+            var login = await Shell.Current.DisplayPromptAsync("WebDAV",
+                presetServer is null ? "Логин" : "Логин на Яндексе", "Далее", "Отмена",
+                presetServer is null ? "user" : "ivan.petrov");
+            if (string.IsNullOrWhiteSpace(login)) return;
+
+            var password = await Shell.Current.DisplayPromptAsync("WebDAV",
+                "Пароль. Если включена двухфакторная проверка — пароль приложения",
+                "Подключить", "Отмена", "пароль");
+            if (string.IsNullOrWhiteSpace(password)) return;
+
+            CloudStatus = "Подключение…";
+            var report = await _cloud.ConnectWebDavAsync(server, login, password);
+            CloudStatus = _cloud.StatusText;
+
+            if (report.Outcome == CloudSyncOutcome.Pulled)
+            {
+                Collapse();
+                await LoadAsync();
+            }
+
+            await Shell.Current.DisplayAlertAsync("Облако подключено",
+                $"{report.Message}\n\nФайл данных: {_cloud.Storage?.RemoteLocation}\n" +
+                "Дальше приложение обновляет его само.", "OK");
+        }
+        catch (Exception ex)
+        {
+            CloudStatus = _cloud.StatusText;
+            await Shell.Current.DisplayAlertAsync("Не удалось подключить облако", ex.Message, "OK");
         }
     }
 

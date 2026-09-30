@@ -9,8 +9,23 @@ public class CloudTokens
     public string RefreshToken { get; set; } = string.Empty;
     public DateTime ExpiresUtc { get; set; }
 
+    /// <summary>Учётные данные WebDAV — заполнены вместо токенов, когда вход по паролю.</summary>
+    public WebDavAccount? WebDav { get; set; }
+
     public bool IsExpired => DateTime.UtcNow >= ExpiresUtc.AddMinutes(-2);
-    public bool HasAccess => !string.IsNullOrEmpty(AccessToken);
+    public bool HasAccess => !string.IsNullOrEmpty(AccessToken) || WebDav is not null;
+}
+
+/// <summary>
+/// Адрес сервера, логин и пароль для WebDAV. Хранятся в каталоге данных
+/// приложения открытым текстом, поэтому лучше заводить пароль приложения,
+/// а не использовать основной пароль от аккаунта.
+/// </summary>
+public class WebDavAccount
+{
+    public string Server { get; set; } = string.Empty;
+    public string User { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
 }
 
 public interface ITokenStore

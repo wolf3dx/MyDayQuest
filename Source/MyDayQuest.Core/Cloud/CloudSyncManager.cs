@@ -82,6 +82,28 @@ public class CloudSyncManager : IAsyncDisposable
         return report;
     }
 
+    /// <summary>
+    /// Подключить WebDAV-хранилище логином и паролем — без регистрации приложения.
+    /// </summary>
+    public async Task<CloudSyncReport> ConnectWebDavAsync(
+        string server, string user, string password, CancellationToken ct = default)
+    {
+        var storage = _factory.Create(CloudProvider.WebDav) as WebDavStorage
+                      ?? throw new InvalidOperationException("WebDAV недоступен.");
+
+        await storage.ConnectAsync(server, user, password, ct);
+
+        _storage = storage;
+        _state.Provider = CloudProvider.WebDav;
+        _state.LastSyncedHash = string.Empty;
+        _state.LastRemoteModifiedUtc = null;
+        _state.Save();
+
+        var report = await SyncNowAsync(ct, force: true);
+        Start();
+        return report;
+    }
+
     /// <summary>Отключить облако: забыть токены и перестать что-либо выгружать.</summary>
     public void Disconnect()
     {
