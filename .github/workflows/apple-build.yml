@@ -87,13 +87,16 @@ jobs:
         run: |
           for ARCH in x64 arm64; do
             DIR="artifacts/maccatalyst-$ARCH"
-            APP=$(ls -d "$DIR"/*.app 2>/dev/null | head -1)
-            if [ -n "$APP" ]; then
-              (cd "$DIR" && zip -qry "../MyDayQuest-macos-$ARCH.zip" "$(basename "$APP")")
-              echo "macOS $ARCH: готов"
-            else
-              echo "macOS $ARCH: .app не найден"; exit 1
+            # .app может лежать не в корне каталога публикации — ищем вглубь.
+            APP=$(find "$DIR" -maxdepth 4 -name "*.app" -type d | head -1)
+            if [ -z "$APP" ]; then
+              echo "macOS $ARCH: .app не найден. Содержимое $DIR:"
+              find "$DIR" -maxdepth 3 | head -40
+              exit 1
             fi
+            echo "macOS $ARCH: $APP"
+            (cd "$(dirname "$APP")" && zip -qry "$GITHUB_WORKSPACE/artifacts/MyDayQuest-macos-$ARCH.zip" "$(basename "$APP")")
+            ls -la "artifacts/MyDayQuest-macos-$ARCH.zip"
           done
 
       - name: Build iOS device (unsigned) and package IPA for AltStore
