@@ -7,7 +7,6 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using MyDayQuest.Avalonia.ViewModels;
-using MyDayQuest.Cloud;
 using MyDayQuest.Data;
 
 namespace MyDayQuest.Avalonia;
@@ -36,7 +35,6 @@ public partial class MainWindow : Window
         {
             await _vm.LoadAsync();
             _ = _vm.CheckUpdateAsync(); // проверка обновления в фоне
-            _ = _vm.StartCloudSyncAsync(); // автосинхронизация с облаком, если оно подключено
         };
     }
 
@@ -152,104 +150,6 @@ public partial class MainWindow : Window
             await Dialogs.AlertAsync(this, "Синхронизация", msg);
         }
         catch (Exception ex) { await Dialogs.AlertAsync(this, "Ошибка", ex.Message); }
-    }
-
-    /// <summary>Меню облака: подключить провайдера, синхронизировать вручную, отключить.</summary>
-    private async void OnCloud(object? sender, RoutedEventArgs e)
-    {
-        var options = new System.Collections.Generic.List<string>();
-        if (_vm.IsCloudEnabled)
-        {
-            options.Add("Синхронизировать сейчас");
-            options.Add("Отключить облако");
-        }
-        options.Add("Яндекс.Диск по паролю (WebDAV)");
-        options.Add("Другой WebDAV-сервер");
-        options.Add("Подключить Яндекс.Диск");
-        options.Add("Подключить OneDrive");
-        options.Add("Подключить Google Drive");
-
-        var choice = await Dialogs.ChooseAsync(this, _vm.CloudStatusText, options.ToArray());
-        switch (choice)
-        {
-            case "Синхронизировать сейчас":
-                var report = await _vm.SyncCloudNowAsync();
-                await Dialogs.AlertAsync(this, "Облако", report.Message);
-                break;
-
-            case "Отключить облако":
-                if (await Dialogs.ConfirmAsync(this, "Облако",
-                        "Отключить облако? Файл в облаке останется, приложение перестанет его обновлять."))
-                    _vm.DisconnectCloud();
-                break;
-
-            case "Яндекс.Диск по паролю (WebDAV)":
-                await ConnectWebDavAsync(WebDavStorage.YandexServer);
-                break;
-            case "Другой WebDAV-сервер":
-                await ConnectWebDavAsync(null);
-                break;
-            case "Подключить Яндекс.Диск":
-                await ConnectCloudAsync(CloudProvider.YandexDisk);
-                break;
-            case "Подключить OneDrive":
-                await ConnectCloudAsync(CloudProvider.OneDrive);
-                break;
-            case "Подключить Google Drive":
-                await ConnectCloudAsync(CloudProvider.GoogleDrive);
-                break;
-        }
-    }
-
-    /// <summary>Мастер подключения по логину и паролю.</summary>
-    private async Task ConnectWebDavAsync(string? presetServer)
-    {
-        try
-        {
-            var server = presetServer;
-            if (server is null)
-            {
-                server = await Dialogs.PromptAsync(this, "WebDAV: адрес сервера", "https://example.com/dav");
-                if (string.IsNullOrWhiteSpace(server)) return;
-            }
-
-            var login = await Dialogs.PromptAsync(this, "WebDAV: логин", "user");
-            if (string.IsNullOrWhiteSpace(login)) return;
-
-            var password = await Dialogs.PromptAsync(this,
-                "WebDAV: пароль (при двухфакторной проверке — пароль приложения)", "пароль");
-            if (string.IsNullOrWhiteSpace(password)) return;
-
-            var report = await _vm.ConnectWebDavAsync(server, login, password);
-            await Dialogs.AlertAsync(this, "Облако подключено",
-                $"{report.Message} Файл данных: {_vm.CloudLocation}. Дальше приложение обновляет его само.");
-        }
-        catch (Exception ex)
-        {
-            await Dialogs.AlertAsync(this, "Не удалось подключить облако", ex.Message);
-        }
-    }
-
-    private async Task ConnectCloudAsync(CloudProvider provider)
-    {
-        if (!_vm.IsCloudConfigured(provider))
-        {
-            await Dialogs.AlertAsync(this, "Облако",
-                $"Для «{provider.Display()}» не задан client_id. Создайте файл {CloudConfig.FileName} " +
-                "рядом с программой по образцу cloud.config.sample.json.");
-            return;
-        }
-
-        try
-        {
-            var report = await _vm.ConnectCloudAsync(provider);
-            await Dialogs.AlertAsync(this, "Облако подключено",
-                $"{report.Message} Файл данных: {_vm.CloudLocation}. Дальше приложение обновляет его само.");
-        }
-        catch (Exception ex)
-        {
-            await Dialogs.AlertAsync(this, "Не удалось подключить облако", ex.Message);
-        }
     }
 
     private void SaveSyncPath(string path) { try { File.WriteAllText(_syncPathFile, path); } catch { } }

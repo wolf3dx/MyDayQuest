@@ -19,7 +19,6 @@ public partial class MainPage : ContentPage
         await _vm.LoadAsync();
         await _vm.RefreshOpenListAsync();
         _ = _vm.CheckUpdateAsync(); // проверка обновления в фоне (не блокируем UI)
-        _ = _vm.StartCloudSyncAsync(); // автосинхронизация с облаком, если оно подключено
     }
 
     private async void OnAboutClicked(object? sender, EventArgs e)

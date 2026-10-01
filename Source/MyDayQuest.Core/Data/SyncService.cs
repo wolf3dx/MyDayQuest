@@ -142,6 +142,81 @@ public class SyncService
         catch { return null; }
     }
 
+    // ---- Цель синхронизации (файл по пути или документ облачного диска) ----
+
+    /// <summary>Отпечаток чужого содержимого без учёта времени экспорта.</summary>
+    public static string ContentHashOf(string json)
+    {
+        var file = JsonSerializer.Deserialize<SyncFile>(json) ?? new SyncFile();
+        file.ExportedUtc = DateTime.MinValue;
+        var normalized = JsonSerializer.Serialize(file, JsonOpts);
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(normalized)));
+    }
+
+    /// <summary>
+    /// Выгрузить данные в цель и убедиться, что они туда легли. Проверка нужна
+    /// не для перестраховки: поставщик документов облачного диска может принять
+    /// запись молча и никуда её не отправить — без чтения обратно это выглядит
+    /// как успешная синхронизация, а изменения пропадают.
+    /// </summary>
+    public async Task PushAsync(ISyncTarget target)
+    {
+        var json = await ExportJsonAsync();
+        await target.WriteAsync(json);
+
+        var written = await target.ReadAsync();
+        if (written is null || ContentHashOf(written) != ContentHashOf(json))
+            throw new IOException(
+                "Файл не сохранился: хранилище приняло запись, но содержимое не изменилось. "
+                + "Так ведут себя некоторые облачные диски. Выберите файл в памяти телефона "
+                + "или в папке другого диска.");
+    }
+
+    /// <summary>Забрать данные из цели (заменяет локальные).</summary>
+    public async Task PullAsync(ISyncTarget target)
+    {
+        var json = await target.ReadAsync()
+                   ?? throw new InvalidDataException("Не удалось прочитать файл синхронизации.");
+        await ImportReplaceAsync(json);
+    }
+
+    /// <summary>
+    /// Sync: кто новее (локальные данные или содержимое цели), тот и переносится.
+    /// Пустая или нечитаемая цель считается отсутствующей — в неё просто выгружаем.
+    /// </summary>
+    public async Task<SyncResult> SyncAsync(ISyncTarget target)
+    {
+        if (!await target.ExistsAsync())
+        {
+            await PushAsync(target);
+            return SyncResult.PushedToFile;
+        }
+
+        var json = await target.ReadAsync();
+        var fileUtc = string.IsNullOrWhiteSpace(json) ? null : ReadExportedUtc(json);
+        if (fileUtc is null)
+        {
+            await PushAsync(target);
+            return SyncResult.PushedToFile;
+        }
+
+        // Сравнение идёт по содержимому, а не только по времени: после выгрузки
+        // штамп в файле всегда свежее последней правки, и сравнение по времени
+        // одно гоняло бы данные обратно при каждом следующем Sync.
+        if (ContentHashOf(json!) == await ContentHashAsync())
+            return SyncResult.UpToDate;
+
+        var localUtc = await _db.GetLastChangeUtcAsync();
+        if (localUtc > fileUtc)
+        {
+            await PushAsync(target);
+            return SyncResult.PushedToFile;
+        }
+
+        await ImportReplaceAsync(json!);
+        return SyncResult.PulledFromFile;
+    }
+
     /// <summary>Sync: кто новее (локальные данные или файл), тот и переносится.</summary>
     public async Task<SyncResult> SyncAsync(string path)
     {

@@ -71,7 +71,7 @@
         <Image Grid.Row="0" Grid.RowSpan="4" Source="/Assets/leatherbg.png" Stretch="UniformToFill" />
 
         <!-- ШАПКА -->
-        <Grid Grid.Row="0" Margin="10,8" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="8">
+        <Grid Grid.Row="0" Margin="10,8" RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
             <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
                 <TextBlock Text="&#x25C6;" Foreground="#D8A22A" FontSize="11" VerticalAlignment="Center" Opacity="0.8" />
                 <TextBlock Text="M &#xB7; D &#xB7; Q" Foreground="#F2D48A" FontSize="22" FontWeight="Bold"
@@ -87,16 +87,7 @@
                 <Button Grid.Column="2" Classes="header" Content="Sync" Background="#FBF3D0" Click="OnSync" />
                 <Button Grid.Column="3" Classes="header" Content="About" Background="#DDEFD9" Click="OnAbout" />
             </Grid>
-            <!-- Облако: подключение и состояние автосинхронизации -->
-            <Grid Grid.Row="2" ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                <Button Grid.Column="0" Classes="header" Content="Cloud" Background="#D5ECF7"
-                        Width="86" Click="OnCloud" />
-                <TextBlock Grid.Column="1" Text="{Binding CloudStatus}"
-                           Foreground="#F2D48A" FontSize="11" Opacity="0.7" TextTrimming="CharacterEllipsis"
-                           VerticalAlignment="Center" />
-            </Grid>
-
-            <Rectangle Grid.Row="3" Height="1" Fill="#D8A22A" Opacity="0.85" />
+            <Rectangle Grid.Row="2" Height="1" Fill="#D8A22A" Opacity="0.85" />
         </Grid>
 
         <!-- СРЕДНЕЕ ПОЛЕ -->

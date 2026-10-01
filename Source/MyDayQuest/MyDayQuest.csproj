@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<!-- Ключ подписи Android-выпуска. Файла нет в репозитории:
 	     без него собирается отладочная подпись, с ним — выпускная. -->
@@ -53,11 +53,15 @@
 		<ApplicationTitle>MyDayQuest</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.mydayquest</ApplicationId>
+		<!-- Своё имя пакета вместо шаблонного com.companyname.*: под шаблонным
+		     именем в мире ходят тысячи чужих сборок, и Play Защита показывает
+		     на них предупреждение при установке. Менять имя после публикации
+		     в Google Play будет уже нельзя. -->
+		<ApplicationId>com.vkandreevich.mydayquest</ApplicationId>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>0.2.0</ApplicationDisplayVersion>
-		<ApplicationVersion>2</ApplicationVersion>
+		<ApplicationDisplayVersion>0.2.2</ApplicationDisplayVersion>
+		<ApplicationVersion>4</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
 		<WindowsPackageType>None</WindowsPackageType>

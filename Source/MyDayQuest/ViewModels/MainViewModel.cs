@@ -1,11 +1,11 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Text;
 using CommunityToolkit.Maui.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MyDayQuest.Cloud;
 using MyDayQuest.Data;
 using MyDayQuest.Models;
+using MyDayQuest.Services;
 using MyDayQuest.Views;
 
 namespace MyDayQuest.ViewModels;
@@ -15,21 +15,10 @@ public partial class MainViewModel : ObservableObject
     private readonly AppDatabase _db;
     private readonly SyncService _sync;
     private readonly UpdateService _update;
-    private readonly CloudSyncManager _cloud;
     private UpdateInfo? _pendingUpdate;
 
-    private const string SyncPathKey = "SyncFilePath";
     private const string SyncFileName = "MyDayQuest.mdq";
 
-    /// <summary>Фильтр выбора файла .mdq для разных платформ.</summary>
-    private static readonly FilePickerFileType MdqFileType = new(
-        new Dictionary<DevicePlatform, IEnumerable<string>>
-        {
-            [DevicePlatform.WinUI] = new[] { ".mdq" },
-            [DevicePlatform.macOS] = new[] { "mdq" },
-            [DevicePlatform.Android] = new[] { "application/octet-stream" },
-            [DevicePlatform.iOS] = new[] { "public.data" },
-        });
 
     // Пастельная палитра для карточек-вкладок (по кругу).
     private static readonly string[] Palette =
@@ -37,22 +26,11 @@ public partial class MainViewModel : ObservableObject
         "#EBDCB8", "#E0CDA0", "#D5BE8C", "#F0E3C4", "#DCC79C", "#E6D5AE", "#CBB183",
     };
 
-    public MainViewModel(AppDatabase db, SyncService sync, UpdateService update, CloudSyncManager cloud)
+    public MainViewModel(AppDatabase db, SyncService sync, UpdateService update)
     {
         _db = db;
         _sync = sync;
         _update = update;
-        _cloud = cloud;
-
-        _cloudStatus = _cloud.StatusText;
-        _cloud.StatusChanged += (_, _) =>
-            MainThread.BeginInvokeOnMainThread(() => CloudStatus = _cloud.StatusText);
-        _cloud.PulledFromCloud += (_, _) =>
-            MainThread.BeginInvokeOnMainThread(async () =>
-            {
-                Collapse();
-                await LoadAsync();
-            });
     }
 
     /// <summary>Ленты листов внизу.</summary>
@@ -491,7 +469,7 @@ public partial class MainViewModel : ObservableObject
             var result = await FileSaver.Default.SaveAsync(SyncFileName, stream);
             if (result.IsSuccessful)
             {
-                Preferences.Set(SyncPathKey, result.FilePath);
+                SyncTargetStore.RememberPath(result.FilePath);
                 await Shell.Current.DisplayAlertAsync("Сохранено",
                     $"Данные сохранены:\n{result.FilePath}", "OK");
             }
@@ -508,22 +486,19 @@ public partial class MainViewModel : ObservableObject
     {
         try
         {
-            var pick = await FilePicker.Default.PickAsync(new PickOptions
-            {
-                PickerTitle = "Выберите файл MyDayQuest (.mdq)",
-                FileTypes = MdqFileType,
-            });
-            if (pick is null) return;
+            var target = await SyncTargetStore.PickAsync();
+            if (target is null) return;
 
             var confirm = await Shell.Current.DisplayAlertAsync("Загрузка",
                 "Текущие данные будут заменены данными из файла. Продолжить?", "Загрузить", "Отмена");
             if (!confirm) return;
 
-            await _sync.LoadFromFileAsync(pick.FullPath);
-            Preferences.Set(SyncPathKey, pick.FullPath);
+            await _sync.PullAsync(target);
             Collapse();
             await LoadAsync();
-            await Shell.Current.DisplayAlertAsync("Готово", "Данные загружены из файла.", "OK");
+            await Shell.Current.DisplayAlertAsync("Готово",
+                $"Данные загружены из файла:\n{target.Describe}\n\n"
+                + "Дальше обновлять его кнопкой «Sync».", "OK");
         }
         catch (Exception ex)
         {
@@ -537,15 +512,16 @@ public partial class MainViewModel : ObservableObject
     {
         try
         {
-            var path = Preferences.Get(SyncPathKey, string.Empty);
-            if (string.IsNullOrEmpty(path))
+            var target = SyncTargetStore.Current;
+            if (target is null)
             {
                 await Shell.Current.DisplayAlertAsync("Синхронизация",
-                    "Сначала нажмите «Save» (выберите файл в облачной папке) или «Load».", "OK");
+                    "Сначала откройте файл синхронизации кнопкой «Load» — например, "
+                    + "в облачном диске. Или создайте его кнопкой «Save».", "OK");
                 return;
             }
 
-            var res = await _sync.SyncAsync(path);
+            var res = await _sync.SyncAsync(target);
             var msg = res switch
             {
                 SyncService.SyncResult.PushedToFile => "Локальные данные новее — выгружены в файл.",
@@ -567,154 +543,4 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    // ---- Облако: подключение и автоматическая выгрузка файла данных ----
-
-    /// <summary>Строка состояния под кнопками («Яндекс.Диск: синхронизировано 27.09 18:40»).</summary>
-    [ObservableProperty]
-    private string _cloudStatus = string.Empty;
-
-    /// <summary>Поднять фоновую синхронизацию при показе главного экрана.</summary>
-    public async Task StartCloudSyncAsync()
-    {
-        _cloud.Start();
-        if (_cloud.IsEnabled)
-            await _cloud.SyncNowAsync(force: true);
-        CloudStatus = _cloud.StatusText;
-    }
-
-    /// <summary>Меню облака: подключить провайдера, синхронизировать вручную, отключить.</summary>
-    [RelayCommand]
-    private async Task CloudAsync()
-    {
-        var options = new List<string>();
-        if (_cloud.IsEnabled)
-        {
-            options.Add("Синхронизировать сейчас");
-            options.Add("Отключить облако");
-        }
-        options.Add("Яндекс.Диск по паролю (WebDAV)");
-        options.Add("Другой WebDAV-сервер");
-        options.Add("Подключить Яндекс.Диск");
-        options.Add("Подключить OneDrive");
-        options.Add("Подключить Google Drive");
-
-        var choice = await Shell.Current.DisplayActionSheetAsync(
-            _cloud.StatusText, "Отмена", null, options.ToArray());
-
-        switch (choice)
-        {
-            case "Синхронизировать сейчас":
-                var report = await _cloud.SyncNowAsync(force: true);
-                CloudStatus = _cloud.StatusText;
-                await Shell.Current.DisplayAlertAsync("Облако", report.Message, "OK");
-                break;
-
-            case "Отключить облако":
-                if (await Shell.Current.DisplayAlertAsync("Облако",
-                        "Отключить облако? Файл в облаке останется, приложение перестанет его обновлять.",
-                        "Отключить", "Отмена"))
-                {
-                    _cloud.Disconnect();
-                    CloudStatus = _cloud.StatusText;
-                }
-                break;
-
-            case "Яндекс.Диск по паролю (WebDAV)":
-                await ConnectWebDavAsync(WebDavStorage.YandexServer);
-                break;
-            case "Другой WebDAV-сервер":
-                await ConnectWebDavAsync(null);
-                break;
-            case "Подключить Яндекс.Диск":
-                await ConnectCloudAsync(CloudProvider.YandexDisk);
-                break;
-            case "Подключить OneDrive":
-                await ConnectCloudAsync(CloudProvider.OneDrive);
-                break;
-            case "Подключить Google Drive":
-                await ConnectCloudAsync(CloudProvider.GoogleDrive);
-                break;
-        }
-    }
-
-    /// <summary>
-    /// Подключение по логину и паролю: регистрировать приложение у провайдера не нужно.
-    /// Для Яндекса адрес сервера подставляем сами.
-    /// </summary>
-    private async Task ConnectWebDavAsync(string? presetServer)
-    {
-        try
-        {
-            var server = presetServer;
-            if (server is null)
-            {
-                server = await Shell.Current.DisplayPromptAsync("WebDAV",
-                    "Адрес сервера", "Далее", "Отмена", "https://example.com/dav");
-                if (string.IsNullOrWhiteSpace(server)) return;
-            }
-
-            var login = await Shell.Current.DisplayPromptAsync("WebDAV",
-                presetServer is null ? "Логин" : "Логин на Яндексе", "Далее", "Отмена",
-                presetServer is null ? "user" : "ivan.petrov");
-            if (string.IsNullOrWhiteSpace(login)) return;
-
-            var password = await Shell.Current.DisplayPromptAsync("WebDAV",
-                "Пароль. Если включена двухфакторная проверка — пароль приложения",
-                "Подключить", "Отмена", "пароль");
-            if (string.IsNullOrWhiteSpace(password)) return;
-
-            CloudStatus = "Подключение…";
-            var report = await _cloud.ConnectWebDavAsync(server, login, password);
-            CloudStatus = _cloud.StatusText;
-
-            if (report.Outcome == CloudSyncOutcome.Pulled)
-            {
-                Collapse();
-                await LoadAsync();
-            }
-
-            await Shell.Current.DisplayAlertAsync("Облако подключено",
-                $"{report.Message}\n\nФайл данных: {_cloud.Storage?.RemoteLocation}\n" +
-                "Дальше приложение обновляет его само.", "OK");
-        }
-        catch (Exception ex)
-        {
-            CloudStatus = _cloud.StatusText;
-            await Shell.Current.DisplayAlertAsync("Не удалось подключить облако", ex.Message, "OK");
-        }
-    }
-
-    private async Task ConnectCloudAsync(CloudProvider provider)
-    {
-        if (!_cloud.IsConfigured(provider))
-        {
-            await Shell.Current.DisplayAlertAsync("Облако",
-                $"Для «{provider.Display()}» не задан client_id.\n\n" +
-                $"Создайте файл {CloudConfig.FileName} рядом с приложением " +
-                "по образцу cloud.config.sample.json.", "OK");
-            return;
-        }
-
-        try
-        {
-            CloudStatus = $"{provider.Display()}: вход…";
-            var report = await _cloud.ConnectAsync(provider);
-            CloudStatus = _cloud.StatusText;
-
-            if (report.Outcome == CloudSyncOutcome.Pulled)
-            {
-                Collapse();
-                await LoadAsync();
-            }
-
-            await Shell.Current.DisplayAlertAsync("Облако подключено",
-                $"{report.Message}\n\nФайл данных: {_cloud.Storage?.RemoteLocation}\n" +
-                "Дальше приложение обновляет его само.", "OK");
-        }
-        catch (Exception ex)
-        {
-            CloudStatus = _cloud.StatusText;
-            await Shell.Current.DisplayAlertAsync("Не удалось подключить облако", ex.Message, "OK");
-        }
-    }
 }
