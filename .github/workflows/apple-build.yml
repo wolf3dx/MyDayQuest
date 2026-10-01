@@ -21,23 +21,42 @@ jobs:
       # Apple-SDK требует РОВНО свою версию Xcode, а не «не ниже»: .NET для
       # MacCatalyst 26.0 работает только с Xcode 26.0. Поэтому выбираем точную
       # версию под закреплённый TFM net10.0-*26.0, а не самую свежую.
+      # Apple-SDK требует РОВНО свою версию Xcode: .NET для MacCatalyst 26.0
+      # работает только с Xcode 26.0. При этом часть установок на раннере
+      # неполные — без macOS SDK и actool, а xcrun это молча скрывает,
+      # подставляя Xcode по умолчанию. Поэтому проверяем файлы напрямую.
       - name: Select Xcode 26.0 (под Apple SDK 26.0)
         run: |
           echo "Установленные Xcode:"
           ls -d /Applications/Xcode*.app
           PICKED=""
-          for APP in /Applications/Xcode_26.0.app /Applications/Xcode_26.0.1.app; do
-            if [ -x "$APP/Contents/Developer/usr/bin/xcodebuild" ]                && DEVELOPER_DIR="$APP/Contents/Developer" xcrun --sdk macosx --show-sdk-path >/dev/null 2>&1; then
-              PICKED="$APP"
-              break
+          for APP in /Applications/Xcode_26.0.1.app /Applications/Xcode_26.0.app; do
+            DEV="$APP/Contents/Developer"
+            if [ ! -x "$DEV/usr/bin/xcodebuild" ]; then
+              echo "пропускаю $APP — нет xcodebuild"; continue
             fi
-            echo "пропускаю $APP — нет или без macOS SDK"
+            if [ ! -d "$DEV/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk" ]; then
+              echo "пропускаю $APP — нет macOS SDK"; continue
+            fi
+            if [ ! -x "$DEV/usr/bin/actool" ]; then
+              echo "пропускаю $APP — нет actool"; continue
+            fi
+            PICKED="$APP"; break
           done
-          if [ -z "$PICKED" ]; then echo "Xcode 26.0 на раннере не найден"; exit 1; fi
+          if [ -z "$PICKED" ]; then
+            echo "Полноценный Xcode 26.0 на раннере не найден."
+            echo "Содержимое кандидатов:"
+            for APP in /Applications/Xcode_26.0.1.app /Applications/Xcode_26.0.app; do
+              echo "--- $APP"
+              ls "$APP/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/" 2>&1 | head -5
+            done
+            exit 1
+          fi
           echo "Выбран: $PICKED"
           sudo xcode-select -s "$PICKED/Contents/Developer"
           xcodebuild -version
           xcrun --sdk macosx --show-sdk-path
+          xcrun --find actool
 
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
