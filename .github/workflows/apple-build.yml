@@ -100,7 +100,15 @@ jobs:
             ls -la "artifacts/MyDayQuest-macos-$ARCH.zip"
           done
 
+      # actool требует симулятор, совпадающий с iphonesimulator SDK выбранного
+      # Xcode; на раннере стоят симуляторы от более новых версий. Докачиваем.
+      - name: Install iOS simulator runtime
+        continue-on-error: true
+        timeout-minutes: 25
+        run: sudo xcodebuild -downloadPlatform iOS
+
       - name: Build iOS device (unsigned) and package IPA for AltStore
+        continue-on-error: true
         run: |
           dotnet build Source/MyDayQuest/MyDayQuest.csproj \
             -f net10.0-ios26.0 -c Release \
