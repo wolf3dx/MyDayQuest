@@ -18,19 +18,22 @@ jobs:
       # .NET для MacCatalyst/iOS жёстко требует Xcode не ниже своего: SDK 27.0 хочет
       # Xcode 27. Берём самый свежий установленный Xcode, у которого на месте macOS SDK
       # (встречаются «обрезанные» сборки вроде Xcode_26.6.0.app — без SDK, их пропускаем).
-      - name: Select newest working Xcode
+      # Apple-SDK требует РОВНО свою версию Xcode, а не «не ниже»: .NET для
+      # MacCatalyst 26.0 работает только с Xcode 26.0. Поэтому выбираем точную
+      # версию под закреплённый TFM net10.0-*26.0, а не самую свежую.
+      - name: Select Xcode 26.0 (под Apple SDK 26.0)
         run: |
           echo "Установленные Xcode:"
           ls -d /Applications/Xcode*.app
           PICKED=""
-          for APP in $(ls -d /Applications/Xcode*.app | sort -V -r); do
+          for APP in /Applications/Xcode_26.0.app /Applications/Xcode_26.0.1.app; do
             if [ -x "$APP/Contents/Developer/usr/bin/xcodebuild" ]                && DEVELOPER_DIR="$APP/Contents/Developer" xcrun --sdk macosx --show-sdk-path >/dev/null 2>&1; then
               PICKED="$APP"
               break
             fi
-            echo "пропускаю $APP — нет macOS SDK"
+            echo "пропускаю $APP — нет или без macOS SDK"
           done
-          if [ -z "$PICKED" ]; then echo "рабочий Xcode не найден"; exit 1; fi
+          if [ -z "$PICKED" ]; then echo "Xcode 26.0 на раннере не найден"; exit 1; fi
           echo "Выбран: $PICKED"
           sudo xcode-select -s "$PICKED/Contents/Developer"
           xcodebuild -version
