@@ -67,13 +67,15 @@ jobs:
         run: dotnet workload install maui
 
       # Базовое правило 9: обе архитектуры — x64 и ARM64 (Apple Silicon).
+      # Ключ -o для Apple-сборок не работает: .app остаётся в bin/Release,
+      # а указанный каталог остаётся пустым. Поэтому публикуем как есть и
+      # забираем пакет из bin.
       - name: Build MacCatalyst x64 (.app, unsigned)
         run: >
           dotnet publish Source/MyDayQuest/MyDayQuest.csproj
           -f net10.0-maccatalyst26.0 -c Release
           -p:RuntimeIdentifier=maccatalyst-x64
           -p:CreatePackage=false -p:EnableCodeSigning=false
-          -o artifacts/maccatalyst-x64
 
       - name: Build MacCatalyst ARM64 (.app, unsigned)
         run: >
@@ -81,17 +83,16 @@ jobs:
           -f net10.0-maccatalyst26.0 -c Release
           -p:RuntimeIdentifier=maccatalyst-arm64
           -p:CreatePackage=false -p:EnableCodeSigning=false
-          -o artifacts/maccatalyst-arm64
 
       - name: Package MacCatalyst .app
         run: |
+          mkdir -p artifacts
           for ARCH in x64 arm64; do
-            DIR="artifacts/maccatalyst-$ARCH"
-            # .app может лежать не в корне каталога публикации — ищем вглубь.
-            APP=$(find "$DIR" -maxdepth 4 -name "*.app" -type d | head -1)
+            DIR="Source/MyDayQuest/bin/Release/net10.0-maccatalyst26.0/maccatalyst-$ARCH"
+            APP=$(find "$DIR" -maxdepth 3 -name "*.app" -type d 2>/dev/null | head -1)
             if [ -z "$APP" ]; then
-              echo "macOS $ARCH: .app не найден. Содержимое $DIR:"
-              find "$DIR" -maxdepth 3 | head -40
+              echo "macOS $ARCH: .app не найден. Ищу по всему дереву сборки:"
+              find Source/MyDayQuest/bin -maxdepth 5 -name "*.app" -type d 2>/dev/null | head -20
               exit 1
             fi
             echo "macOS $ARCH: $APP"
@@ -104,19 +105,19 @@ jobs:
           dotnet build Source/MyDayQuest/MyDayQuest.csproj \
             -f net10.0-ios26.0 -c Release \
             -p:RuntimeIdentifier=ios-arm64 \
-            -p:CodesignRequired=false -p:EnableCodeSigning=false \
-            -o artifacts/ios
-          APP=$(find artifacts/ios -maxdepth 2 -name "*.app" -type d | head -1)
+            -p:CodesignRequired=false -p:EnableCodeSigning=false
+          APP=$(find Source/MyDayQuest/bin/Release/net10.0-ios26.0 -maxdepth 3 -name "*.app" -type d | head -1)
           echo "iOS .app: $APP"
-          if [ -n "$APP" ]; then
-            rm -rf artifacts/Payload
-            mkdir -p artifacts/Payload
-            cp -R "$APP" artifacts/Payload/
-            (cd artifacts && zip -qry MyDayQuest-ios-unsigned.ipa Payload)
-            echo "IPA готов:"; ls -la artifacts/MyDayQuest-ios-unsigned.ipa
-          else
-            echo "iOS .app не найден"; exit 1
+          if [ -z "$APP" ]; then
+            echo "iOS .app не найден. Дерево сборки:"
+            find Source/MyDayQuest/bin -maxdepth 5 -name "*.app" -type d | head -20
+            exit 1
           fi
+          rm -rf artifacts/Payload
+          mkdir -p artifacts/Payload
+          cp -R "$APP" artifacts/Payload/
+          (cd artifacts && zip -qry MyDayQuest-ios-unsigned.ipa Payload)
+          echo "IPA готов:"; ls -la artifacts/MyDayQuest-ios-unsigned.ipa
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
