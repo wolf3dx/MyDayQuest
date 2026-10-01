@@ -5,6 +5,11 @@
 	<Import Project="$(MSBuildThisFileDirectory)..\..\android-signing.props"
 	        Condition="Exists('$(MSBuildThisFileDirectory)..\..\android-signing.props')" />
 
+	<!-- Ключ подписи Android-выпуска. Файла нет в репозитории:
+	     без него собирается отладочная подпись, с ним — выпускная. -->
+	<Import Project="$(MSBuildThisFileDirectory)..\..\android-signing.props"
+	        Condition="Exists('$(MSBuildThisFileDirectory)..\..\android-signing.props')" />
+
 	<PropertyGroup>
 		<TargetFrameworks>net10.0-android</TargetFrameworks>
 		<!-- Apple-SDK закреплён на ветке 26.x: SDK 27.0 требует Xcode 27, которого
