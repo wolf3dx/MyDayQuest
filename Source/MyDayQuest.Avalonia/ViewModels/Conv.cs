@@ -24,7 +24,7 @@ public static class Conv
 
     private sealed class SelBrushConverter : IValueConverter
     {
-        private static readonly IBrush Selected = new SolidColorBrush(Color.Parse("#512BD4"));
+        private static readonly IBrush Selected = new SolidColorBrush(Color.Parse("#2E6FD6"));
         private static readonly IBrush Normal = new SolidColorBrush(Color.Parse("#50000000"));
         public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
             => value is true ? Selected : Normal;

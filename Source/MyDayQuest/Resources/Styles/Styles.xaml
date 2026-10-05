@@ -57,6 +57,8 @@
                         <VisualState.Setters>
                             <Setter Property="Scale" Value="0.96" />
                             <Setter Property="Opacity" Value="0.8" />
+                            <Setter Property="BorderColor" Value="{StaticResource QuestSelectBright}" />
+                            <Setter Property="BorderWidth" Value="2" />
                         </VisualState.Setters>
                     </VisualState>
                 </VisualStateGroup>

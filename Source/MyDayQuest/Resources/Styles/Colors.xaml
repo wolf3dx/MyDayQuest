@@ -55,6 +55,10 @@
     <Color x:Key="QuestInkSoft">#6B5537</Color>     <!-- вторичный текст -->
     <Color x:Key="QuestGreen">#5FB13A</Color>
     <Color x:Key="QuestRed">#C0392B</Color>
+    <!-- Синяя рамка выбранного: единственный холодный цвет в тёплой палитре,
+         поэтому выбранное видно сразу и не спорит с золотом рамок. -->
+    <Color x:Key="QuestSelect">#2E6FD6</Color>      <!-- выбранное на пергаменте -->
+    <Color x:Key="QuestSelectBright">#5B9BFF</Color><!-- выбранное на тёмном -->
 
     <SolidColorBrush x:Key="ParchmentBrush" Color="{StaticResource Parchment}"/>
     <SolidColorBrush x:Key="QuestGoldBrush" Color="{StaticResource QuestGold}"/>

@@ -54,10 +54,12 @@
                             BackgroundColor="{StaticResource Parchment}" Padding="8" Margin="0,0,0,6">
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                <Setter Property="Stroke" Value="{StaticResource QuestGoldBright}" />
+                                <Setter Property="Stroke" Value="{StaticResource QuestSelect}" />
+                                <Setter Property="StrokeThickness" Value="3" />
                             </DataTrigger>
                             <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="False">
                                 <Setter Property="Stroke" Value="{StaticResource ParchmentEdge}" />
+                                <Setter Property="StrokeThickness" Value="2" />
                             </DataTrigger>
                         </Border.Triggers>
                         <Border.GestureRecognizers>

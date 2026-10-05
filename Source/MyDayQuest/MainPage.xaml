@@ -36,6 +36,7 @@
                             <VisualState.Setters>
                                 <Setter Property="Scale" Value="0.96" />
                                 <Setter Property="Opacity" Value="0.85" />
+                                <Setter Property="BorderColor" Value="{StaticResource QuestSelectBright}" />
                             </VisualState.Setters>
                         </VisualState>
                     </VisualStateGroup>
@@ -274,10 +275,12 @@
                                 
                                 <Border.Triggers>
                                     <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                        <Setter Property="Stroke" Value="{StaticResource QuestGoldBright}" />
+                                        <Setter Property="Stroke" Value="{StaticResource QuestSelect}" />
+                                        <Setter Property="StrokeThickness" Value="3" />
                                     </DataTrigger>
                                     <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="False">
                                         <Setter Property="Stroke" Value="{StaticResource QuestGold}" />
+                                        <Setter Property="StrokeThickness" Value="2" />
                                     </DataTrigger>
                                 </Border.Triggers>
                                 <Border.GestureRecognizers>
@@ -408,8 +411,8 @@
                                 <Border.Triggers>
                                     <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
                                         <Setter Property="TranslationY" Value="-8" />
-                                        <Setter Property="StrokeThickness" Value="2" />
-                                        <Setter Property="Stroke" Value="{StaticResource QuestGoldBright}" />
+                                        <Setter Property="StrokeThickness" Value="3" />
+                                        <Setter Property="Stroke" Value="{StaticResource QuestSelect}" />
                                     </DataTrigger>
                                 </Border.Triggers>
                                 <Border.GestureRecognizers>
