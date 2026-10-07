@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Описание виджета. Растягивается в обе стороны вплоть до всей страницы
+  рабочего стола: занять «весь экран» в буквальном смысле виджет не может,
+  он живёт в сетке лаунчера — максимум это полная страница.
+  Обновление системой раз в полчаса (чаще Android и не станет), плюс
+  приложение обновляет виджет само, когда план меняется.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialLayout="@layout/daily_widget"
+    android:previewLayout="@layout/daily_widget"
+    android:minWidth="180dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="60dp"
+    android:maxResizeWidth="600dp"
+    android:maxResizeHeight="900dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="5"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:description="@string/widget_description"
+    android:updatePeriodMillis="1800000" />

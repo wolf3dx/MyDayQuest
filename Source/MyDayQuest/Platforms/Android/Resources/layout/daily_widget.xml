@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Виджет «Задания на сегодня».
+  Строк ровно четыре — столько же, сколько влезает в дневной план (DailyTaskLimit).
+  Поэтому список статический: отдельный поставщик строк тут был бы лишней
+  машинерией ради заведомо известного числа.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/widget_root"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:background="@drawable/widget_bg"
+              android:padding="12dp">
+
+    <TextView
+        android:id="@+id/widget_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ЗАДАНИЯ НА СЕГОДНЯ"
+        android:textColor="#F2D48A"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.12"
+        android:gravity="center"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <!-- Разделитель именно ImageView: голый View виджетам инфлейтить нельзя,
+         список разрешённых классов RemoteViews его не содержит. -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:contentDescription="@null"
+        android:background="#6E5320" />
+
+    <TextView
+        android:id="@+id/widget_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Журнал заданий пуст"
+        android:textColor="#9A8A6A"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:paddingTop="16dp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/row_0"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/widget_row_bg"
+        android:padding="10dp"
+        android:layout_marginBottom="6dp"
+        android:visibility="gone">
+        <TextView android:id="@+id/title_0"
+                  android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:textColor="#2A1F12" android:textSize="15sp" android:textStyle="bold"
+                  android:maxLines="2" android:ellipsize="end" />
+        <TextView android:id="@+id/sub_0"
+                  android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:textColor="#6B5537" android:textSize="12sp"
+                  android:maxLines="1" android:ellipsize="end" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/row_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/widget_row_bg"
+        android:padding="10dp"
+        android:layout_marginBottom="6dp"
+        android:visibility="gone">
+        <TextView android:id="@+id/title_1"
+                  android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:textColor="#2A1F12" android:textSize="15sp" android:textStyle="bold"
+                  android:maxLines="2" android:ellipsize="end" />
+        <TextView android:id="@+id/sub_1"
+                  android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:textColor="#6B5537" android:textSize="12sp"
+                  android:maxLines="1" android:ellipsize="end" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/row_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/widget_row_bg"
+        android:padding="10dp"
+        android:layout_marginBottom="6dp"
+        android:visibility="gone">
+        <TextView android:id="@+id/title_2"
+                  android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:textColor="#2A1F12" android:textSize="15sp" android:textStyle="bold"
+                  android:maxLines="2" android:ellipsize="end" />
+        <TextView android:id="@+id/sub_2"
+                  android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:textColor="#6B5537" android:textSize="12sp"
+                  android:maxLines="1" android:ellipsize="end" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/row_3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/widget_row_bg"
+        android:padding="10dp"
+        android:layout_marginBottom="6dp"
+        android:visibility="gone">
+        <TextView android:id="@+id/title_3"
+                  android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:textColor="#2A1F12" android:textSize="15sp" android:textStyle="bold"
+                  android:maxLines="2" android:ellipsize="end" />
+        <TextView android:id="@+id/sub_3"
+                  android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:textColor="#6B5537" android:textSize="12sp"
+                  android:maxLines="1" android:ellipsize="end" />
+    </LinearLayout>
+
+</LinearLayout>

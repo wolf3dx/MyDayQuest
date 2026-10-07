@@ -189,6 +189,10 @@ public partial class MainViewModel : ObservableObject
                 IsOverdue = task.IsOverdue,
             });
         }
+
+        // Единственное место, через которое проходит любое изменение плана,
+        // поэтому и виджет перерисовываем отсюда — а не в каждом обработчике.
+        Services.WidgetService.Refresh();
     }
 
     /// <summary>Отметить текущее подзадание плашки Главного окна выполненным.</summary>
