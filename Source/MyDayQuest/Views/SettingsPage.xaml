@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MyDayQuest.Views.SettingsPage"
@@ -38,6 +38,23 @@
                                     Format="HH:mm"
                                     TextColor="{StaticResource QuestInk}"
                                     PropertyChanged="OnTimeChanged" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10"
+                          x:Name="BootRow" IsVisible="False">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Переживать перезагрузку"
+                                   TextColor="{StaticResource QuestInk}"
+                                   FontSize="16" />
+                            <Label Text="Приложение будет запускаться вместе с телефоном — только ради напоминания."
+                                   TextColor="{StaticResource QuestInkSoft}"
+                                   FontSize="12" LineHeight="1.25" />
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1" x:Name="BootSwitch"
+                                OnColor="{StaticResource QuestSelect}"
+                                ThumbColor="{StaticResource Parchment}"
+                                VerticalOptions="Center"
+                                Toggled="OnBootToggled" />
                     </Grid>
 
                     <Label x:Name="ReminderNote" IsVisible="False"

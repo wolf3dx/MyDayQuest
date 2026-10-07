@@ -14,12 +14,13 @@ public partial class SettingsPage : ContentPage
         ReminderSwitch.IsToggled = ReminderSettings.Enabled;
         ReminderTime.Time = ReminderSettings.Time;
         ReminderSwitch.IsEnabled = ReminderService.Supported;
+        BootSwitch.IsToggled = ReminderSettings.StartOnBoot;
         TimeRow.IsVisible = ReminderSettings.Enabled;
+        BootRow.IsVisible = ReminderSettings.Enabled;
         ReminderNote.IsVisible = ReminderSettings.Enabled;
         _loading = false;
 
-        if (!ReminderService.Supported)
-            ReminderNote.Text = "Напоминания пока работают только на Android.";
+        UpdateNote();
     }
 
     private async void OnReminderToggled(object? sender, ToggledEventArgs e)
@@ -44,10 +45,36 @@ public partial class SettingsPage : ContentPage
 
         ReminderSettings.Enabled = e.Value;
         TimeRow.IsVisible = e.Value;
+        BootRow.IsVisible = e.Value;
         ReminderNote.IsVisible = e.Value;
 
         if (e.Value) ReminderService.Reschedule();
         else ReminderService.Cancel();
+        ReminderService.ApplyStartOnBoot();
+        UpdateNote();
+    }
+
+    private void OnBootToggled(object? sender, ToggledEventArgs e)
+    {
+        if (_loading) return;
+
+        ReminderSettings.StartOnBoot = e.Value;
+        ReminderService.ApplyStartOnBoot();
+        UpdateNote();
+    }
+
+    /// <summary>Подпись честно говорит, что будет после перезагрузки.</summary>
+    private void UpdateNote()
+    {
+        if (!ReminderService.Supported)
+        {
+            ReminderNote.Text = "Напоминания пока работают только на Android.";
+            return;
+        }
+
+        ReminderNote.Text = ReminderSettings.StartOnBoot
+            ? "После перезагрузки телефона напоминание включится само."
+            : "После перезагрузки телефона напоминание включится снова, когда вы откроете приложение.";
     }
 
     private void OnTimeChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)

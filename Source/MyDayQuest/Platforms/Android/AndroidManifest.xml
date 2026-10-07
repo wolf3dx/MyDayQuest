@@ -5,4 +5,7 @@
 	<uses-permission android:name="android.permission.INTERNET" />
 	<!-- Уведомление о заданиях на сегодня. Разрешение спрашивается при включении напоминания. -->
 	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+	<!-- Взвести напоминание после перезагрузки. Приёмник объявлен выключенным
+	     и включается, только если пользователь сам разрешил это в настройках. -->
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 </manifest>

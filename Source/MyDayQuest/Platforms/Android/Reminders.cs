@@ -1,4 +1,4 @@
-using Android.App;
+﻿using Android.App;
 using Android.Content;
 using Android.OS;
 using MyDayQuest.Services;
@@ -52,6 +52,24 @@ public static class Reminders
         var ctx = Platform.AppContext;
         var mgr = (AlarmManager?)ctx.GetSystemService(Context.AlarmService);
         mgr?.Cancel(Pending()!);
+    }
+
+    /// <summary>
+    /// Включить или выключить приёмник загрузки. Пока он выключен, система не
+    /// поднимает приложение вместе с собой — настройка не просто игнорируется,
+    /// а физически снимает автозапуск.
+    /// </summary>
+    public static void SetBootEnabled(bool on)
+    {
+        var ctx = Platform.AppContext;
+        var pm = ctx.PackageManager;
+        if (pm is null) return;
+
+        var component = new ComponentName(ctx, Java.Lang.Class.FromType(typeof(BootReceiver)));
+        pm.SetComponentEnabledSetting(component,
+            on ? global::Android.Content.PM.ComponentEnabledState.Enabled
+               : global::Android.Content.PM.ComponentEnabledState.Disabled,
+            global::Android.Content.PM.ComponentEnableOption.DontKillApp);
     }
 
     private static PendingIntent? Pending()

@@ -44,4 +44,13 @@ public static class ReminderService
         Platforms.Android.Reminders.Cancel();
 #endif
     }
+
+    /// <summary>Переживать ли перезагрузку телефона.</summary>
+    public static void ApplyStartOnBoot()
+    {
+#if ANDROID
+        Platforms.Android.Reminders.SetBootEnabled(
+            ReminderSettings.Enabled && ReminderSettings.StartOnBoot);
+#endif
+    }
 }
