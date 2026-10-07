@@ -185,6 +185,8 @@ public partial class MainViewModel : ObservableObject
                 CurrentSubtaskId = current?.Id,
                 CurrentSubtaskText = current?.Title ?? string.Empty,
                 HasCurrentSubtask = current is not null,
+                PlannedForDate = task.PlannedForDate,
+                IsOverdue = task.IsOverdue,
             });
         }
     }
@@ -418,6 +420,8 @@ public partial class MainViewModel : ObservableObject
         }
 
         task.InDailyPlan = card.InDailyPlan;
+        // День постановки в план: по нему потом видно, что задание висит со вчера.
+        task.PlannedForDate = card.InDailyPlan ? DateTime.Now.Date : null;
         await _db.SaveTaskAsync(task);
     }
 

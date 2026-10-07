@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -290,6 +290,8 @@ public partial class MainViewModel : ObservableObject
             }
         }
         task.InDailyPlan = card.InDailyPlan;
+        // День постановки в план: по нему потом видно, что задание висит со вчера.
+        task.PlannedForDate = card.InDailyPlan ? DateTime.Now.Date : null;
         await _db.SaveTaskAsync(task);
         await LoadDailyPlanAsync();
     }

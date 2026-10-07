@@ -171,10 +171,17 @@
                 </CollectionView.EmptyView>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:DailyTaskVM">
-                        <!-- Свиток: золотая рамка, внутри пергамент -->
+                        <!-- Свиток: золотая рамка, внутри пергамент.
+                             Задание, не сделанное в свой день, краснеет. -->
                         <Border StrokeShape="RoundRectangle 5" StrokeThickness="2"
                                 Stroke="{StaticResource QuestGold}"
                                 Padding="0" Margin="0,0,0,12">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsOverdue}" Value="True">
+                                        <Setter Property="Stroke" Value="{StaticResource QuestRed}" />
+                                        <Setter Property="StrokeThickness" Value="3" />
+                                    </DataTrigger>
+                                </Border.Triggers>
                                 <Border.Background>
                                     <RadialGradientBrush Center="0.5,0.4" Radius="0.85">
                                         <GradientStop Color="#F6EBD0" Offset="0.0" />
@@ -192,12 +199,20 @@
                                           ColumnDefinitions="Auto,*"
                                           RowSpacing="8" ColumnSpacing="10">
 
-                                        <!-- Лист-источник -->
-                                        <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                                        <!-- Лист-источник, а для просроченного — с какого дня висит -->
+                                        <Label Grid.Row="0" Grid.Column="0"
                                                Text="{Binding ListLine}"
                                                FontFamily="{StaticResource SerifFont}"
                                                TextColor="{StaticResource QuestInkSoft}"
                                                CharacterSpacing="1" FontSize="11" />
+                                        <Label Grid.Row="0" Grid.Column="1"
+                                               Text="{Binding OverdueText}"
+                                               IsVisible="{Binding IsOverdue}"
+                                               FontFamily="{StaticResource SerifFont}"
+                                               TextColor="{StaticResource QuestRed}"
+                                               FontAttributes="Bold"
+                                               CharacterSpacing="1" FontSize="11"
+                                               HorizontalTextAlignment="End" />
 
                                         <!-- Медальон «!» и название задания -->
                                         <Image Grid.Row="1" Grid.Column="0" Source="questmark.png"
@@ -207,7 +222,13 @@
                                                FontFamily="{StaticResource SerifFont}"
                                                TextColor="{StaticResource QuestInk}"
                                                FontAttributes="Bold" FontSize="16"
-                                               VerticalOptions="Center" />
+                                               VerticalOptions="Center">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsOverdue}" Value="True">
+                                                    <Setter Property="TextColor" Value="{StaticResource QuestRed}" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
 
                                         <!-- Разделитель -->
                                         <BoxView Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
@@ -399,13 +420,15 @@
                         HorizontalScrollBarVisibility="Always"
                         Padding="20,14">
                 <HorizontalStackLayout BindableLayout.ItemsSource="{Binding Tabs}"
-                                       Spacing="0" VerticalOptions="Fill">
+                                       Spacing="10" VerticalOptions="Fill">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="vm:QuestTab">
-                            <Border StrokeShape="RoundRectangle 8,8,0,0"
+                            <!-- Овал: радиус в половину высоты плашки. Закладки больше не
+                                 наезжают друг на друга — у овалов нахлёст читается как брак,
+                                 да и у самой левой половина рамки уходила за край экрана. -->
+                            <Border StrokeShape="RoundRectangle 39"
                                     StrokeThickness="1" Stroke="{StaticResource QuestGoldDim}"
                                     WidthRequest="132"
-                                    Margin="-14,0,0,0"
                                     BackgroundColor="{StaticResource Parchment}"
                                     Padding="0">
                                 <Border.Triggers>
@@ -428,7 +451,7 @@
                                            TextColor="{StaticResource QuestInk}"
                                            FontSize="12" FontAttributes="Bold"
                                            LineBreakMode="TailTruncation"
-                                           Margin="6,0"
+                                           Margin="16,0"
                                            HorizontalOptions="Center" VerticalOptions="Center"
                                            HorizontalTextAlignment="Center" />
                                 </Grid>

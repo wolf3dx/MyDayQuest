@@ -1,4 +1,4 @@
-namespace MyDayQuest.Data;
+﻿namespace MyDayQuest.Data;
 
 /// <summary>Единый файл синхронизации: все листы → задания → подзадания.</summary>
 public class SyncFile
@@ -27,6 +27,7 @@ public class SyncTask
     public int Progress { get; set; }
     public bool IsDone { get; set; }
     public bool InDailyPlan { get; set; }
+    public DateTime? PlannedForDate { get; set; }
     public int SortOrder { get; set; }
     public DateTime UpdatedUtc { get; set; }
     public List<SyncSubtask> Subtasks { get; set; } = new();

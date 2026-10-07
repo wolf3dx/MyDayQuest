@@ -1,4 +1,4 @@
-using MyDayQuest.Models;
+﻿using MyDayQuest.Models;
 using SQLite;
 
 namespace MyDayQuest.Data;
@@ -52,6 +52,12 @@ public class AppDatabase
         }
         await db.ExecuteAsync("UPDATE quest_tasks SET QuestUid = '' WHERE QuestUid IS NULL");
         await db.ExecuteAsync("UPDATE subtasks SET TaskUid = '' WHERE TaskUid IS NULL");
+
+        // Заданиям, стоявшим в плане до появления даты, ставим сегодняшний день:
+        // иначе они все разом окажутся просроченными и покраснеют на пустом месте.
+        await db.ExecuteAsync(
+            "UPDATE quest_tasks SET PlannedForDate = ? WHERE InDailyPlan = 1 AND PlannedForDate IS NULL",
+            DateTime.Now.Date.Ticks);
     }
 
     // ---- Quests (листы) ----
@@ -150,6 +156,13 @@ public class AppDatabase
         var db = await GetConnectionAsync();
         return await db.Table<QuestTask>().Where(t => t.InDailyPlan)
             .OrderBy(t => t.SortOrder).ToListAsync();
+    }
+
+    /// <summary>Имена листов по их Id — чтобы не тянуть листы целиком.</summary>
+    public async Task<Dictionary<int, string>> GetQuestNamesAsync()
+    {
+        var quests = await GetQuestsAsync();
+        return quests.ToDictionary(q => q.Id, q => q.Name);
     }
 
     public async Task<int> CountDailyPlanAsync()

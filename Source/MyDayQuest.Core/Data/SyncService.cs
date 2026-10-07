@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using MyDayQuest.Models;
@@ -43,6 +43,7 @@ public class SyncService
                 {
                     Uid = t.Uid, Title = t.Title, StartDate = t.StartDate, Deadline = t.Deadline,
                     Progress = t.Progress, IsDone = t.IsDone, InDailyPlan = t.InDailyPlan,
+                    PlannedForDate = t.PlannedForDate,
                     SortOrder = t.SortOrder, UpdatedUtc = t.UpdatedUtc,
                 };
                 foreach (var s in allSubs.Where(x => x.TaskId == t.Id).OrderBy(x => x.SortOrder))
@@ -84,7 +85,8 @@ public class SyncService
                     Uid = string.IsNullOrEmpty(t.Uid) ? Guid.NewGuid().ToString() : t.Uid,
                     QuestId = questId, QuestUid = q.Uid, Title = t.Title,
                     StartDate = t.StartDate, Deadline = t.Deadline, Progress = t.Progress,
-                    IsDone = t.IsDone, InDailyPlan = t.InDailyPlan, SortOrder = t.SortOrder,
+                    IsDone = t.IsDone, InDailyPlan = t.InDailyPlan, PlannedForDate = t.PlannedForDate,
+                    SortOrder = t.SortOrder,
                     UpdatedUtc = t.UpdatedUtc == default ? DateTime.UtcNow : t.UpdatedUtc,
                 });
 

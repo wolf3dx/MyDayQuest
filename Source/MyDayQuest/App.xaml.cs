@@ -7,6 +7,11 @@ public partial class App : Application
 	public App()
 	{
 		InitializeComponent();
+
+		// Будильник напоминания живёт до перезагрузки телефона, поэтому взводим
+		// его при каждом запуске. Поднимать приложение самой загрузкой системы
+		// намеренно не стали — это уже автозапуск.
+		Services.ReminderService.Reschedule();
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)

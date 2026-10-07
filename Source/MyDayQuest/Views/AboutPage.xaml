@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MyDayQuest.Views.AboutPage"
@@ -14,6 +14,11 @@
                    HorizontalOptions="Center" />
             <Label Text="M.D.Q" TextColor="{StaticResource QuestGoldBright}"
                    FontSize="15" Opacity="0.6" HorizontalOptions="Center" />
+
+            <Button Text="Настройки"
+                    Style="{StaticResource HeaderButton}"
+                    HeightRequest="42" Margin="0,8,0,0"
+                    Clicked="OnSettingsClicked" />
 
             <!-- Свиток с описанием -->
             <Border StrokeShape="RoundRectangle 8" StrokeThickness="2"

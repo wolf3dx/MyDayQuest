@@ -36,6 +36,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<QuestEditPage>();
 		builder.Services.AddTransient<AboutPage>();
 		builder.Services.AddTransient<TaskDetailPage>();
+		builder.Services.AddTransient<SettingsPage>();
 
 #if DEBUG
 		builder.Logging.AddDebug();

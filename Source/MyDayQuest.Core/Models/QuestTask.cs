@@ -44,6 +44,18 @@ public class QuestTask
     /// <summary>Задание добавлено в Главный Лист (единый дневной план) — чек-бокс у Name.</summary>
     public bool InDailyPlan { get; set; }
 
+    /// <summary>
+    /// День, на который задание поставлено в план (местная дата, время нулевое).
+    /// Нужен, чтобы отличить «на сегодня» от «висит с прошлых дней»: по одному
+    /// флагу InDailyPlan этого не узнать. Проставляется при постановке в план.
+    /// </summary>
+    public DateTime? PlannedForDate { get; set; }
+
+    /// <summary>Задание в плане со вчера и раньше и до сих пор не выполнено.</summary>
+    [Ignore]
+    public bool IsOverdue => InDailyPlan && !IsDone
+                             && PlannedForDate is { } d && d.Date < DateTime.Now.Date;
+
     /// <summary>Время последнего изменения (для слияния при синхронизации).</summary>
     public DateTime UpdatedUtc { get; set; } = DateTime.UtcNow;
 }
