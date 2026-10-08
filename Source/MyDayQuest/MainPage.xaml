@@ -6,87 +6,11 @@
              x:DataType="vm:MainViewModel"
              Shell.NavBarIsVisible="False">
 
-    <ContentPage.Resources>
-
-        <!-- Серифный шрифт берём системный: на каждой платформе он свой. -->
-        <OnPlatform x:Key="SerifFont" x:TypeArguments="x:String">
-            <On Platform="WinUI" Value="Georgia" />
-            <On Platform="iOS, MacCatalyst" Value="Georgia" />
-            <On Platform="Android" Value="serif" />
-        </OnPlatform>
-
-        <!-- Реакция кнопок на наведение (PointerOver) и нажатие (Pressed) -->
-        <Style x:Key="HoverButton" TargetType="Button">
-            <Setter Property="VisualStateManager.VisualStateGroups">
-                <VisualStateGroupList>
-                    <VisualStateGroup x:Name="CommonStates">
-                        <VisualState x:Name="Normal">
-                            <VisualState.Setters>
-                                <Setter Property="Scale" Value="1" />
-                                <Setter Property="Opacity" Value="1" />
-                            </VisualState.Setters>
-                        </VisualState>
-                        <VisualState x:Name="PointerOver">
-                            <VisualState.Setters>
-                                <Setter Property="Scale" Value="1.04" />
-                                <Setter Property="BorderColor" Value="{StaticResource QuestGoldBright}" />
-                            </VisualState.Setters>
-                        </VisualState>
-                        <VisualState x:Name="Pressed">
-                            <VisualState.Setters>
-                                <Setter Property="Scale" Value="0.96" />
-                                <Setter Property="Opacity" Value="0.85" />
-                                <Setter Property="BorderColor" Value="{StaticResource QuestSelectBright}" />
-                            </VisualState.Setters>
-                        </VisualState>
-                    </VisualStateGroup>
-                </VisualStateGroupList>
-            </Setter>
-        </Style>
-
-        <!-- Кнопка-«камень»: тёмный градиент в золотой рамке -->
-        <Style x:Key="HeaderButton" TargetType="Button" BasedOn="{StaticResource HoverButton}">
-            <Setter Property="TextColor" Value="{StaticResource QuestGoldBright}" />
-            <Setter Property="FontFamily" Value="{StaticResource SerifFont}" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="HeightRequest" Value="36" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="BorderWidth" Value="1" />
-            <Setter Property="BorderColor" Value="{StaticResource QuestGold}" />
-            <Setter Property="Background">
-                <Setter.Value>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                        <GradientStop Color="#48381F" Offset="0" />
-                        <GradientStop Color="#221A0E" Offset="1" />
-                    </LinearGradientBrush>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Крупная кнопка действия (+ / QUEST / –) -->
-        <Style x:Key="ActionButton" TargetType="Button" BasedOn="{StaticResource HoverButton}">
-            <Setter Property="FontFamily" Value="{StaticResource SerifFont}" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="HeightRequest" Value="58" />
-            <Setter Property="BorderWidth" Value="2" />
-            <Setter Property="BorderColor" Value="{StaticResource QuestGold}" />
-            <Setter Property="Background">
-                <Setter.Value>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                        <GradientStop Color="#4A3920" Offset="0" />
-                        <GradientStop Color="#1E170D" Offset="1" />
-                    </LinearGradientBrush>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-    </ContentPage.Resources>
-
-    <Grid RowDefinitions="Auto,*,Auto" BackgroundColor="{StaticResource Leather}">
+    <Grid RowDefinitions="Auto,*,Auto" BackgroundColor="{DynamicResource Leather}">
 
         <!-- Тёмная кожа обложки под всем содержимым -->
         <Image Grid.Row="0" Grid.RowSpan="3" Source="leatherbg.png" Aspect="AspectFill"
+               IsVisible="{Binding IsQuestSkin}"
                WidthRequest="1" HeightRequest="1"
                HorizontalOptions="Fill" VerticalOptions="Fill" />
 
@@ -95,20 +19,20 @@
 
             <!-- Название с ромбами-разделителями -->
             <HorizontalStackLayout Grid.Row="0" HorizontalOptions="Center" Spacing="10">
-                <Label Text="◆" TextColor="{StaticResource QuestGold}" FontSize="11"
+                <Label Text="◆" TextColor="{DynamicResource QuestGold}" FontSize="11"
                        VerticalOptions="Center" Opacity="0.8" />
                 <Label Text="M · D · Q"
-                       FontFamily="{StaticResource SerifFont}"
-                       TextColor="{StaticResource QuestGoldBright}"
+                       FontFamily="{DynamicResource SerifFont}"
+                       TextColor="{DynamicResource QuestGoldBright}"
                        CharacterSpacing="2" FontSize="22" FontAttributes="Bold"
                        VerticalOptions="Center" />
-                <Label Text="◆" TextColor="{StaticResource QuestGold}" FontSize="11"
+                <Label Text="◆" TextColor="{DynamicResource QuestGold}" FontSize="11"
                        VerticalOptions="Center" Opacity="0.8" />
             </HorizontalStackLayout>
 
             <Label Grid.Row="1" Text="ЖУРНАЛ ЗАДАНИЙ"
-                   FontFamily="{StaticResource SerifFont}"
-                   TextColor="{StaticResource QuestGold}" Opacity="0.75"
+                   FontFamily="{DynamicResource SerifFont}"
+                   TextColor="{DynamicResource QuestGold}" Opacity="0.75"
                    CharacterSpacing="5" FontSize="10"
                    HorizontalOptions="Center" />
 
@@ -123,24 +47,24 @@
 
             <Grid Grid.Row="2" ColumnDefinitions="*,*,*,*" ColumnSpacing="6" Margin="0,4,0,0">
                 <Button Grid.Column="0" Text="Save"
-                        Style="{StaticResource HeaderButton}"
+                        Style="{DynamicResource HeaderButton}"
                         Command="{Binding SaveCommand}" />
                 <Button Grid.Column="1" Text="Load"
-                        Style="{StaticResource HeaderButton}"
+                        Style="{DynamicResource HeaderButton}"
                         Command="{Binding LoadFromFileCommand}" />
                 <Button Grid.Column="2" Text="Sync"
-                        Style="{StaticResource HeaderButton}"
+                        Style="{DynamicResource HeaderButton}"
                         Command="{Binding SyncCommand}" />
                 <Button Grid.Column="3" Text="About"
-                        Style="{StaticResource HeaderButton}"
+                        Style="{DynamicResource HeaderButton}"
                         Clicked="OnAboutClicked" />
             </Grid>
 
             <!-- Золотая линия под шапкой -->
             <Grid Grid.Row="3" Margin="0,6,0,0" HeightRequest="3">
-                <BoxView HeightRequest="1" Color="{StaticResource QuestGold}"
+                <BoxView HeightRequest="1" Color="{DynamicResource QuestGold}"
                          Opacity="0.85" VerticalOptions="Start" />
-                <BoxView HeightRequest="1" Color="{StaticResource QuestGoldDim}"
+                <BoxView HeightRequest="1" Color="{DynamicResource QuestGoldDim}"
                          VerticalOptions="End" />
             </Grid>
         </Grid>
@@ -155,16 +79,16 @@
                             SelectionMode="None">
                 <CollectionView.EmptyView>
                     <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Fill" Spacing="10" Padding="16,24">
-                        <Label Text="!" TextColor="{StaticResource QuestGold}" Opacity="0.35"
-                               FontFamily="{StaticResource SerifFont}"
+                        <Label Text="!" TextColor="{DynamicResource QuestGold}" Opacity="0.35"
+                               FontFamily="{DynamicResource SerifFont}"
                                FontSize="52" FontAttributes="Bold" HorizontalOptions="Center" />
                         <Label Text="Журнал заданий пуст"
-                               FontFamily="{StaticResource SerifFont}"
-                               TextColor="{StaticResource QuestGoldBright}" Opacity="0.65"
+                               FontFamily="{DynamicResource SerifFont}"
+                               TextColor="{DynamicResource QuestGoldBright}" Opacity="0.65"
                                FontSize="15" HorizontalOptions="Center" />
                         <Label Text="Отметьте задание в листе — и оно появится здесь."
-                               FontFamily="{StaticResource SerifFont}"
-                               TextColor="{StaticResource QuestGoldBright}" Opacity="0.4"
+                               FontFamily="{DynamicResource SerifFont}"
+                               TextColor="{DynamicResource QuestGoldBright}" Opacity="0.4"
                                FontSize="12" HorizontalTextAlignment="Center"
                                LineBreakMode="WordWrap" />
                     </VerticalStackLayout>
@@ -174,25 +98,18 @@
                         <!-- Свиток: золотая рамка, внутри пергамент.
                              Задание, не сделанное в свой день, краснеет. -->
                         <Border StrokeShape="RoundRectangle 5" StrokeThickness="2"
-                                Stroke="{StaticResource QuestGold}"
+                                Stroke="{DynamicResource QuestGold}"
+                                Background="{DynamicResource CardBrush}"
                                 Padding="0" Margin="0,0,0,12">
                                 <Border.Triggers>
                                     <DataTrigger TargetType="Border" Binding="{Binding IsOverdue}" Value="True">
-                                        <Setter Property="Stroke" Value="{StaticResource QuestRed}" />
+                                        <Setter Property="Stroke" Value="{DynamicResource QuestRed}" />
                                         <Setter Property="StrokeThickness" Value="3" />
                                     </DataTrigger>
                                 </Border.Triggers>
-                                <Border.Background>
-                                    <RadialGradientBrush Center="0.5,0.4" Radius="0.85">
-                                        <GradientStop Color="#F6EBD0" Offset="0.0" />
-                                        <GradientStop Color="#E7D6AE" Offset="0.6" />
-                                        <GradientStop Color="#D3BB8C" Offset="1.0" />
-                                    </RadialGradientBrush>
-                                </Border.Background>
-                                
                             <Grid>
                                 <Border StrokeShape="RoundRectangle 3" StrokeThickness="1"
-                                        Stroke="{StaticResource QuestGoldDim}"
+                                        Stroke="{DynamicResource QuestGoldDim}"
                                         BackgroundColor="Transparent"
                                         Margin="4" Padding="12,10">
                                     <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto"
@@ -202,14 +119,14 @@
                                         <!-- Лист-источник, а для просроченного — с какого дня висит -->
                                         <Label Grid.Row="0" Grid.Column="0"
                                                Text="{Binding ListLine}"
-                                               FontFamily="{StaticResource SerifFont}"
-                                               TextColor="{StaticResource QuestInkSoft}"
+                                               FontFamily="{DynamicResource SerifFont}"
+                                               TextColor="{DynamicResource QuestInkSoft}"
                                                CharacterSpacing="1" FontSize="11" />
                                         <Label Grid.Row="0" Grid.Column="1"
                                                Text="{Binding OverdueText}"
                                                IsVisible="{Binding IsOverdue}"
-                                               FontFamily="{StaticResource SerifFont}"
-                                               TextColor="{StaticResource QuestRed}"
+                                               FontFamily="{DynamicResource SerifFont}"
+                                               TextColor="{DynamicResource QuestRed}"
                                                FontAttributes="Bold"
                                                CharacterSpacing="1" FontSize="11"
                                                HorizontalTextAlignment="End" />
@@ -219,31 +136,31 @@
                                                WidthRequest="34" HeightRequest="34" VerticalOptions="Start" />
                                         <Label Grid.Row="1" Grid.Column="1"
                                                Text="{Binding NameLine}"
-                                               FontFamily="{StaticResource SerifFont}"
-                                               TextColor="{StaticResource QuestInk}"
+                                               FontFamily="{DynamicResource SerifFont}"
+                                               TextColor="{DynamicResource QuestInk}"
                                                FontAttributes="Bold" FontSize="16"
                                                VerticalOptions="Center">
                                             <Label.Triggers>
                                                 <DataTrigger TargetType="Label" Binding="{Binding IsOverdue}" Value="True">
-                                                    <Setter Property="TextColor" Value="{StaticResource QuestRed}" />
+                                                    <Setter Property="TextColor" Value="{DynamicResource QuestRed}" />
                                                 </DataTrigger>
                                             </Label.Triggers>
                                         </Label>
 
                                         <!-- Разделитель -->
                                         <BoxView Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                                                 HeightRequest="1" Color="{StaticResource ParchmentEdge}" />
+                                                 HeightRequest="1" Color="{DynamicResource ParchmentEdge}" />
 
                                         <!-- Текущая цель -->
                                         <CheckBox Grid.Row="3" Grid.Column="0" IsChecked="False"
-                                                  Color="{StaticResource QuestInk}"
+                                                  Color="{DynamicResource QuestInk}"
                                                   VerticalOptions="Center"
                                                   IsVisible="{Binding HasCurrentSubtask}"
                                                   CheckedChanged="OnDailySubtaskChecked" />
                                         <Label Grid.Row="3" Grid.Column="1"
                                                Text="{Binding CurrentSubtaskText}"
-                                               FontFamily="{StaticResource SerifFont}"
-                                               TextColor="{StaticResource QuestInk}"
+                                               FontFamily="{DynamicResource SerifFont}"
+                                               TextColor="{DynamicResource QuestInk}"
                                                FontSize="14" VerticalOptions="Center"
                                                IsVisible="{Binding HasCurrentSubtask}" />
 
@@ -252,21 +169,21 @@
                                                              Spacing="4">
                                             <Grid ColumnDefinitions="*,Auto">
                                                 <Label Grid.Column="0" Text="{Binding DateRange}"
-                                                       FontFamily="{StaticResource SerifFont}"
-                                                       TextColor="{StaticResource QuestInkSoft}"
+                                                       FontFamily="{DynamicResource SerifFont}"
+                                                       TextColor="{DynamicResource QuestInkSoft}"
                                                        FontSize="11" />
                                                 <Label Grid.Column="1" Text="{Binding ProgressText}"
-                                                       FontFamily="{StaticResource SerifFont}"
-                                                       TextColor="{StaticResource QuestInkSoft}"
+                                                       FontFamily="{DynamicResource SerifFont}"
+                                                       TextColor="{DynamicResource QuestInkSoft}"
                                                        FontSize="11" FontAttributes="Bold" />
                                             </Grid>
                                             <Border StrokeShape="RoundRectangle 2" StrokeThickness="1"
-                                                    Stroke="{StaticResource ParchmentEdge}"
+                                                    Stroke="{DynamicResource ParchmentEdge}"
                                                     BackgroundColor="#33000000"
                                                     HeightRequest="8" Padding="0">
                                                 <ProgressBar
                                                     Progress="{Binding Progress, Converter={StaticResource PercentToFraction}}"
-                                                    ProgressColor="{StaticResource QuestGold}"
+                                                    ProgressColor="{DynamicResource QuestGold}"
                                                     BackgroundColor="Transparent"
                                                     VerticalOptions="Fill" />
                                             </Border>
@@ -285,22 +202,15 @@
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="vm:TaskItemVM">
                             <Border StrokeShape="RoundRectangle 5" StrokeThickness="2"
+                                    Background="{DynamicResource CardBrush}"
                                     Padding="0" Margin="0,0,0,12">
-                                <Border.Background>
-                                    <RadialGradientBrush Center="0.5,0.4" Radius="0.85">
-                                        <GradientStop Color="#F6EBD0" Offset="0.0" />
-                                        <GradientStop Color="#E7D6AE" Offset="0.6" />
-                                        <GradientStop Color="#D3BB8C" Offset="1.0" />
-                                    </RadialGradientBrush>
-                                </Border.Background>
-                                
                                 <Border.Triggers>
                                     <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                        <Setter Property="Stroke" Value="{StaticResource QuestSelect}" />
+                                        <Setter Property="Stroke" Value="{DynamicResource QuestSelect}" />
                                         <Setter Property="StrokeThickness" Value="3" />
                                     </DataTrigger>
                                     <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="False">
-                                        <Setter Property="Stroke" Value="{StaticResource QuestGold}" />
+                                        <Setter Property="Stroke" Value="{DynamicResource QuestGold}" />
                                         <Setter Property="StrokeThickness" Value="2" />
                                     </DataTrigger>
                                 </Border.Triggers>
@@ -315,7 +225,7 @@
 
                                 <Grid>
                                     <Border StrokeShape="RoundRectangle 3" StrokeThickness="1"
-                                            Stroke="{StaticResource QuestGoldDim}"
+                                            Stroke="{DynamicResource QuestGoldDim}"
                                             BackgroundColor="Transparent"
                                             Margin="4" Padding="12,10">
                                         <Grid RowDefinitions="Auto,Auto,Auto,Auto"
@@ -328,30 +238,30 @@
                                             <Grid Grid.Row="0" Grid.Column="1" ColumnDefinitions="*,Auto">
                                                 <Label Grid.Column="0"
                                                        Text="{Binding NameLine}"
-                                                       FontFamily="{StaticResource SerifFont}"
-                                                       TextColor="{StaticResource QuestInk}"
+                                                       FontFamily="{DynamicResource SerifFont}"
+                                                       TextColor="{DynamicResource QuestInk}"
                                                        FontAttributes="Bold" FontSize="16"
                                                        VerticalOptions="Center" />
                                                 <CheckBox Grid.Column="1"
-                                                          Color="{StaticResource QuestInk}"
+                                                          Color="{DynamicResource QuestInk}"
                                                           VerticalOptions="Center"
                                                           IsChecked="{Binding InDailyPlan}"
                                                           CheckedChanged="OnPlanChecked" />
                                             </Grid>
 
                                             <BoxView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                                                     HeightRequest="1" Color="{StaticResource ParchmentEdge}" />
+                                                     HeightRequest="1" Color="{DynamicResource ParchmentEdge}" />
 
                                             <!-- Текущая цель -->
                                             <CheckBox Grid.Row="2" Grid.Column="0" IsChecked="False"
-                                                      Color="{StaticResource QuestInk}"
+                                                      Color="{DynamicResource QuestInk}"
                                                       VerticalOptions="Center"
                                                       IsVisible="{Binding HasCurrentSubtask}"
                                                       CheckedChanged="OnCurrentSubtaskChecked" />
                                             <Label Grid.Row="2" Grid.Column="1"
                                                    Text="{Binding CurrentSubtaskText}"
-                                                   FontFamily="{StaticResource SerifFont}"
-                                                   TextColor="{StaticResource QuestInk}"
+                                                   FontFamily="{DynamicResource SerifFont}"
+                                                   TextColor="{DynamicResource QuestInk}"
                                                    FontSize="14" VerticalOptions="Center"
                                                    IsVisible="{Binding HasCurrentSubtask}" />
 
@@ -360,21 +270,21 @@
                                                                  Spacing="4">
                                                 <Grid ColumnDefinitions="*,Auto">
                                                     <Label Grid.Column="0" Text="{Binding DateRange}"
-                                                           FontFamily="{StaticResource SerifFont}"
-                                                           TextColor="{StaticResource QuestInkSoft}"
+                                                           FontFamily="{DynamicResource SerifFont}"
+                                                           TextColor="{DynamicResource QuestInkSoft}"
                                                            FontSize="11" />
                                                     <Label Grid.Column="1" Text="{Binding ProgressText}"
-                                                           FontFamily="{StaticResource SerifFont}"
-                                                           TextColor="{StaticResource QuestInkSoft}"
+                                                           FontFamily="{DynamicResource SerifFont}"
+                                                           TextColor="{DynamicResource QuestInkSoft}"
                                                            FontSize="11" FontAttributes="Bold" />
                                                 </Grid>
                                                 <Border StrokeShape="RoundRectangle 2" StrokeThickness="1"
-                                                        Stroke="{StaticResource ParchmentEdge}"
+                                                        Stroke="{DynamicResource ParchmentEdge}"
                                                         BackgroundColor="#33000000"
                                                         HeightRequest="8" Padding="0">
                                                     <ProgressBar
                                                         Progress="{Binding Progress, Converter={StaticResource PercentToFraction}}"
-                                                        ProgressColor="{StaticResource QuestGold}"
+                                                        ProgressColor="{DynamicResource QuestGold}"
                                                         BackgroundColor="Transparent"
                                                         VerticalOptions="Fill" />
                                                 </Border>
@@ -391,22 +301,22 @@
             <!-- Кнопки + / QUEST / – внизу среднего поля -->
             <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,*,Auto" Margin="0,10,0,0">
                 <Button Grid.Column="0"
-                        Style="{StaticResource ActionButton}"
+                        Style="{DynamicResource ActionButton}"
                         Text="+" FontSize="30" FontAttributes="Bold"
-                        TextColor="{StaticResource QuestGreen}"
+                        TextColor="{DynamicResource QuestGreen}"
                         WidthRequest="74"
                         Command="{Binding AddCommand}" />
                 <Button Grid.Column="2"
-                        Style="{StaticResource ActionButton}"
+                        Style="{DynamicResource ActionButton}"
                         Text="QUEST" FontSize="17" FontAttributes="Bold"
                         CharacterSpacing="2"
-                        TextColor="{StaticResource QuestGoldBright}"
+                        TextColor="{DynamicResource ActionButtonText}"
                         Padding="14,0"
                         Command="{Binding GoHomeCommand}" />
                 <Button Grid.Column="4"
-                        Style="{StaticResource ActionButton}"
+                        Style="{DynamicResource ActionButton}"
                         Text="–" FontSize="30" FontAttributes="Bold"
-                        TextColor="{StaticResource QuestRed}"
+                        TextColor="{DynamicResource QuestRed}"
                         WidthRequest="74"
                         Command="{Binding RemoveCommand}" />
             </Grid>
@@ -414,7 +324,7 @@
 
         <!-- ============ НИЖНИЙ БЛОК: закладки листов ============ -->
         <Grid Grid.Row="2" HeightRequest="106">
-            <BoxView HeightRequest="1" Color="{StaticResource QuestGold}"
+            <BoxView HeightRequest="1" Color="{DynamicResource QuestGold}"
                      Opacity="0.7" VerticalOptions="Start" />
             <ScrollView Orientation="Horizontal"
                         HorizontalScrollBarVisibility="Always"
@@ -427,15 +337,15 @@
                                  наезжают друг на друга — у овалов нахлёст читается как брак,
                                  да и у самой левой половина рамки уходила за край экрана. -->
                             <Border StrokeShape="RoundRectangle 39"
-                                    StrokeThickness="1" Stroke="{StaticResource QuestGoldDim}"
+                                    StrokeThickness="1" Stroke="{DynamicResource QuestGoldDim}"
                                     WidthRequest="132"
-                                    BackgroundColor="{StaticResource Parchment}"
+                                    BackgroundColor="{DynamicResource Parchment}"
                                     Padding="0">
                                 <Border.Triggers>
                                     <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
                                         <Setter Property="TranslationY" Value="-8" />
                                         <Setter Property="StrokeThickness" Value="3" />
-                                        <Setter Property="Stroke" Value="{StaticResource QuestSelect}" />
+                                        <Setter Property="Stroke" Value="{DynamicResource QuestSelect}" />
                                     </DataTrigger>
                                 </Border.Triggers>
                                 <Border.GestureRecognizers>
@@ -447,8 +357,8 @@
                                     <!-- Fill + выравнивание по центру: иначе на Android длинное
                                          название не обрезается, а вылезает за края закладки. -->
                                     <Label Text="{Binding ShortName}"
-                                           FontFamily="{StaticResource SerifFont}"
-                                           TextColor="{StaticResource QuestInk}"
+                                           FontFamily="{DynamicResource SerifFont}"
+                                           TextColor="{DynamicResource QuestInk}"
                                            FontSize="12" FontAttributes="Bold"
                                            LineBreakMode="TailTruncation"
                                            Margin="16,0"

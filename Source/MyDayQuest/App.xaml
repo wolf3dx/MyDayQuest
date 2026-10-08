@@ -9,6 +9,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+                <!-- Скин по умолчанию. На запуске подменяется на выбранный. -->
+                <ResourceDictionary Source="Resources/Styles/SkinQuest.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <conv:CheckGlyphConverter x:Key="CheckGlyph" />

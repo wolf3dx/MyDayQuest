@@ -18,6 +18,8 @@ public partial class SettingsPage : ContentPage
         TimeRow.IsVisible = ReminderSettings.Enabled;
         BootRow.IsVisible = ReminderSettings.Enabled;
         ReminderNote.IsVisible = ReminderSettings.Enabled;
+        SkinQuestOption.IsChecked = SkinService.Current == Skin.Quest;
+        SkinClassicOption.IsChecked = SkinService.Current == Skin.Classic;
         _loading = false;
 
         UpdateNote();
@@ -75,6 +77,13 @@ public partial class SettingsPage : ContentPage
         ReminderNote.Text = ReminderSettings.StartOnBoot
             ? "После перезагрузки телефона напоминание включится само."
             : "После перезагрузки телефона напоминание включится снова, когда вы откроете приложение.";
+    }
+
+    private void OnSkinChanged(object? sender, CheckedChangedEventArgs e)
+    {
+        if (_loading || !e.Value) return;
+
+        SkinService.Apply(SkinClassicOption.IsChecked ? Skin.Classic : Skin.Quest);
     }
 
     private void OnTimeChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)

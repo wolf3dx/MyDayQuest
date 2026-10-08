@@ -2,41 +2,41 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MyDayQuest.Views.SettingsPage"
-             BackgroundColor="{StaticResource Leather}"
+             BackgroundColor="{DynamicResource Leather}"
              Title="Настройки">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="16">
 
             <!-- ============ Напоминание ============ -->
             <Border StrokeShape="RoundRectangle 8" StrokeThickness="2"
-                    Stroke="{StaticResource QuestGold}"
-                    BackgroundColor="{StaticResource Parchment}"
+                    Stroke="{DynamicResource QuestGold}"
+                    BackgroundColor="{DynamicResource Parchment}"
                     Padding="16">
                 <VerticalStackLayout Spacing="12">
 
-                    <Label Text="Напоминание" TextColor="{StaticResource QuestInk}"
+                    <Label Text="Напоминание" TextColor="{DynamicResource QuestInk}"
                            FontAttributes="Bold" FontSize="18" />
-                    <Label TextColor="{StaticResource QuestInk}" LineHeight="1.35"
+                    <Label TextColor="{DynamicResource QuestInk}" LineHeight="1.35"
                            Text="Раз в день приложение напомнит, какие задания стоят в Главном Листе. Невыполненные со вчера будут отмечены отдельно." />
 
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                         <Label Grid.Column="0" Text="Напоминать о заданиях"
-                               TextColor="{StaticResource QuestInk}"
+                               TextColor="{DynamicResource QuestInk}"
                                FontSize="16" VerticalOptions="Center" />
                         <Switch Grid.Column="1" x:Name="ReminderSwitch"
-                                OnColor="{StaticResource QuestSelect}"
-                                ThumbColor="{StaticResource Parchment}"
+                                OnColor="{DynamicResource QuestSelect}"
+                                ThumbColor="{DynamicResource Parchment}"
                                 Toggled="OnReminderToggled" />
                     </Grid>
 
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10"
                           x:Name="TimeRow" IsVisible="False">
                         <Label Grid.Column="0" Text="Во сколько"
-                               TextColor="{StaticResource QuestInk}"
+                               TextColor="{DynamicResource QuestInk}"
                                FontSize="16" VerticalOptions="Center" />
                         <TimePicker Grid.Column="1" x:Name="ReminderTime"
                                     Format="HH:mm"
-                                    TextColor="{StaticResource QuestInk}"
+                                    TextColor="{DynamicResource QuestInk}"
                                     PropertyChanged="OnTimeChanged" />
                     </Grid>
 
@@ -44,23 +44,62 @@
                           x:Name="BootRow" IsVisible="False">
                         <VerticalStackLayout Grid.Column="0" Spacing="2">
                             <Label Text="Переживать перезагрузку"
-                                   TextColor="{StaticResource QuestInk}"
+                                   TextColor="{DynamicResource QuestInk}"
                                    FontSize="16" />
                             <Label Text="Приложение будет запускаться вместе с телефоном — только ради напоминания."
-                                   TextColor="{StaticResource QuestInkSoft}"
+                                   TextColor="{DynamicResource QuestInkSoft}"
                                    FontSize="12" LineHeight="1.25" />
                         </VerticalStackLayout>
                         <Switch Grid.Column="1" x:Name="BootSwitch"
-                                OnColor="{StaticResource QuestSelect}"
-                                ThumbColor="{StaticResource Parchment}"
+                                OnColor="{DynamicResource QuestSelect}"
+                                ThumbColor="{DynamicResource Parchment}"
                                 VerticalOptions="Center"
                                 Toggled="OnBootToggled" />
                     </Grid>
 
                     <Label x:Name="ReminderNote" IsVisible="False"
-                           TextColor="{StaticResource QuestInkSoft}" FontSize="13"
+                           TextColor="{DynamicResource QuestInkSoft}" FontSize="13"
                            LineHeight="1.3"
                            Text="После перезагрузки телефона напоминание включится снова, когда вы откроете приложение." />
+
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ============ Оформление ============ -->
+            <Border StrokeShape="RoundRectangle 8" StrokeThickness="2"
+                    Stroke="{DynamicResource QuestGold}"
+                    BackgroundColor="{DynamicResource Parchment}"
+                    Padding="16">
+                <VerticalStackLayout Spacing="12">
+
+                    <Label Text="Оформление" TextColor="{DynamicResource QuestInk}"
+                           FontAttributes="Bold" FontSize="18" />
+
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Игровой" TextColor="{DynamicResource QuestInk}" FontSize="16" />
+                            <Label Text="Журнал заданий: кожа, пергамент и золото."
+                                   TextColor="{DynamicResource QuestInkSoft}"
+                                   FontSize="12" LineHeight="1.25" />
+                        </VerticalStackLayout>
+                        <RadioButton Grid.Column="1" x:Name="SkinQuestOption"
+                                     GroupName="Skin" Content=""
+                                     VerticalOptions="Center"
+                                     CheckedChanged="OnSkinChanged" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Классический" TextColor="{DynamicResource QuestInk}" FontSize="16" />
+                            <Label Text="Обычный вид MAUI: светлый фон и системный шрифт."
+                                   TextColor="{DynamicResource QuestInkSoft}"
+                                   FontSize="12" LineHeight="1.25" />
+                        </VerticalStackLayout>
+                        <RadioButton Grid.Column="1" x:Name="SkinClassicOption"
+                                     GroupName="Skin" Content=""
+                                     VerticalOptions="Center"
+                                     CheckedChanged="OnSkinChanged" />
+                    </Grid>
 
                 </VerticalStackLayout>
             </Border>

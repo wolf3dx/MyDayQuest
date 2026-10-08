@@ -19,6 +19,9 @@ public partial class MainViewModel : ObservableObject
 
     private const string SyncFileName = "MyDayQuest.mdq";
 
+    /// <summary>Кожаную обложку рисуем только в игровом скине.</summary>
+    public bool IsQuestSkin => Services.SkinService.IsQuest;
+
 
     // Пастельная палитра для карточек-вкладок (по кругу).
     private static readonly string[] Palette =
@@ -31,6 +34,10 @@ public partial class MainViewModel : ObservableObject
         _db = db;
         _sync = sync;
         _update = update;
+
+        // Цвета подменяются сами через DynamicResource, а вот видимость обложки
+        // живёт на привязке — её надо толкнуть вручную при смене скина.
+        Services.SkinService.Changed += () => OnPropertyChanged(nameof(IsQuestSkin));
     }
 
     /// <summary>Ленты листов внизу.</summary>

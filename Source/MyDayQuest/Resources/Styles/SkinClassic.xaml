@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  Скин «классический»: обычный вид MAUI — светлый фон, системный шрифт,
+  фиолетовый акцент платформы вместо золота.
+  Имена ключей остались «игровыми» (Leather, Parchment, QuestGold): они здесь
+  означают роль, а не цвет — фон окна, плашка, акцент. Переименовывать их
+  значило бы переписать всю разметку ради косметики.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                    x:Class="MyDayQuest.Resources.Styles.SkinClassic">
+
+    <!-- ==== Цвета ==== -->
+    <Color x:Key="Leather">#F3F3F5</Color>          <!-- фон окна -->
+    <Color x:Key="LeatherPanel">#E7E7EC</Color>     <!-- нижняя панель вкладок -->
+    <Color x:Key="LeatherButton">#E2E2E8</Color>    <!-- кнопки -->
+    <Color x:Key="Parchment">#FFFFFF</Color>        <!-- плашки заданий -->
+    <Color x:Key="ParchmentEdge">#D6D6DC</Color>    <!-- край плашки -->
+    <Color x:Key="QuestGold">#512BD4</Color>        <!-- рамки, акценты -->
+    <Color x:Key="QuestGoldBright">#512BD4</Color>  <!-- текст на фоне окна -->
+    <Color x:Key="QuestGoldDim">#C9C9D1</Color>     <!-- разделители -->
+    <Color x:Key="QuestInk">#1C1C1E</Color>         <!-- текст на плашке -->
+    <Color x:Key="QuestInkSoft">#6E6E78</Color>     <!-- вторичный текст -->
+    <Color x:Key="QuestGreen">#2E9E4F</Color>
+    <Color x:Key="QuestRed">#C0392B</Color>
+    <Color x:Key="QuestSelect">#2E6FD6</Color>
+    <Color x:Key="QuestSelectBright">#2E6FD6</Color>
+
+    <Color x:Key="ActionButtonText">#FFFFFF</Color>
+
+    <!-- ==== Шрифт ==== -->
+    <!-- Тот самый, что ставится в новом проекте MAUI. -->
+    <OnPlatform x:Key="SerifFont" x:TypeArguments="x:String">
+        <On Platform="WinUI" Value="OpenSansRegular" />
+        <On Platform="iOS, MacCatalyst" Value="OpenSansRegular" />
+        <On Platform="Android" Value="OpenSansRegular" />
+    </OnPlatform>
+
+    <!-- ==== Заливки ==== -->
+    <!-- Ровная белая плашка: никакого свечения, как в обычном списке. -->
+    <SolidColorBrush x:Key="CardBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="HeaderButtonBrush" Color="#512BD4" />
+    <SolidColorBrush x:Key="ActionButtonBrush" Color="#512BD4" />
+
+    <!-- ==== Стили кнопок ==== -->
+    <Style x:Key="HoverButton" TargetType="Button">
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal">
+                        <VisualState.Setters>
+                            <Setter Property="Scale" Value="1" />
+                            <Setter Property="Opacity" Value="1" />
+                        </VisualState.Setters>
+                    </VisualState>
+                    <VisualState x:Name="PointerOver">
+                        <VisualState.Setters>
+                            <Setter Property="Opacity" Value="0.9" />
+                        </VisualState.Setters>
+                    </VisualState>
+                    <VisualState x:Name="Pressed">
+                        <VisualState.Setters>
+                            <Setter Property="Opacity" Value="0.75" />
+                            <Setter Property="BorderColor" Value="{DynamicResource QuestSelectBright}" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </Setter>
+    </Style>
+
+    <Style x:Key="HeaderButton" TargetType="Button" BasedOn="{StaticResource HoverButton}">
+        <Setter Property="TextColor" Value="#FFFFFF" />
+        <Setter Property="FontFamily" Value="{DynamicResource SerifFont}" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="HeightRequest" Value="36" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="BorderWidth" Value="0" />
+        <Setter Property="Background" Value="{DynamicResource HeaderButtonBrush}" />
+    </Style>
+
+    <Style x:Key="ActionButton" TargetType="Button" BasedOn="{StaticResource HoverButton}">
+        <Setter Property="TextColor" Value="#FFFFFF" />
+        <Setter Property="FontFamily" Value="{DynamicResource SerifFont}" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="HeightRequest" Value="58" />
+        <Setter Property="BorderWidth" Value="0" />
+        <Setter Property="Background" Value="{DynamicResource ActionButtonBrush}" />
+    </Style>
+
+</ResourceDictionary>
