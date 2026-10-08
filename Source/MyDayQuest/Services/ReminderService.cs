@@ -1,4 +1,4 @@
-namespace MyDayQuest.Services;
+﻿namespace MyDayQuest.Services;
 
 /// <summary>
 /// Напоминание о заданиях на сегодня. Сейчас работает на Android; на остальных
@@ -42,6 +42,17 @@ public static class ReminderService
     {
 #if ANDROID
         Platforms.Android.Reminders.Cancel();
+#endif
+    }
+
+    /// <summary>Показать напоминание сейчас — чтобы убедиться, что оно дойдёт.</summary>
+    public static async Task ShowNowAsync()
+    {
+#if ANDROID
+        Platforms.Android.Reminders.EnsureChannel();
+        await Platforms.Android.ReminderReceiver.ShowNowAsync();
+#else
+        await Task.CompletedTask;
 #endif
     }
 

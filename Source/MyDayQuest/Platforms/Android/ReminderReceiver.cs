@@ -1,4 +1,4 @@
-using Android.App;
+﻿using Android.App;
 using Android.Content;
 using AndroidX.Core.App;
 using MyDayQuest.Data;
@@ -22,7 +22,10 @@ public class ReminderReceiver : BroadcastReceiver
         _ = ShowAsync(ctx).ContinueWith(_ => pending.Finish());
     }
 
-    private static async Task ShowAsync(Context ctx)
+    /// <summary>Показать уведомление сейчас — тем же кодом, что и по будильнику.</summary>
+    public static Task ShowNowAsync() => ShowAsync(Platform.AppContext, reschedule: false);
+
+    private static async Task ShowAsync(Context ctx, bool reschedule = true)
     {
         try
         {
@@ -32,7 +35,7 @@ public class ReminderReceiver : BroadcastReceiver
 
             if (tasks.Count == 0)
             {
-                Reminders.Schedule();   // плана нет — просто переставляем на завтра
+                if (reschedule) Reminders.Schedule();   // плана нет — просто переставляем на завтра
                 return;
             }
 
@@ -67,13 +70,16 @@ public class ReminderReceiver : BroadcastReceiver
 
             NotificationManagerCompat.From(ctx).Notify(NotificationId, builder.Build());
         }
-        catch
+        catch (Exception ex)
         {
-            // Напоминание — не та вещь, ради которой стоит ронять приложение.
+            // Ронять приложение из-за напоминания не стоит, но и молчать нельзя:
+            // не показанное уведомление без следа в журнале не отличить от
+            // пустого плана.
+            global::Android.Util.Log.Error("MyDayQuest.Reminder", ex.ToString());
         }
         finally
         {
-            Reminders.Schedule();   // следующий будильник на завтра
+            if (reschedule) Reminders.Schedule();   // следующий будильник на завтра
         }
     }
 }

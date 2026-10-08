@@ -57,6 +57,11 @@
                                 Toggled="OnBootToggled" />
                     </Grid>
 
+                    <Button x:Name="TestButton" Text="Показать сейчас"
+                            Style="{DynamicResource HeaderButton}"
+                            HeightRequest="40" IsVisible="False"
+                            Clicked="OnTestReminder" />
+
                     <Label x:Name="ReminderNote" IsVisible="False"
                            TextColor="{DynamicResource QuestInkSoft}" FontSize="13"
                            LineHeight="1.3"
