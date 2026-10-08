@@ -1,4 +1,4 @@
-using Android.App;
+﻿using Android.App;
 using Android.Content;
 
 namespace MyDayQuest.Platforms.Android;
@@ -19,5 +19,9 @@ public class BootReceiver : BroadcastReceiver
 
         Reminders.EnsureChannel();
         Reminders.Schedule();
+
+        // После перезагрузки виджет показывает пустую заготовку, пока система
+        // не обновит его по расписанию — а это полчаса. Наполняем сразу.
+        DailyWidgetProvider.Refresh();
     }
 }
