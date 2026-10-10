@@ -63,6 +63,11 @@ public class SyncService
         return JsonSerializer.Serialize(file, JsonOpts);
     }
 
+    /// <summary>
+    /// Заменить все данные содержимым файла. Прогресс заданий в конце
+    /// пересчитывается: в файле он мог устареть или прийти из чужой версии,
+    /// а показывать «0 %» при выполненных подзаданиях — враньё.
+    /// </summary>
     public async Task ImportReplaceAsync(string json)
     {
         var file = JsonSerializer.Deserialize<SyncFile>(json)
@@ -105,6 +110,9 @@ public class SyncService
                 }
             }
         }
+
+        foreach (var t in await _db.GetAllTasksAsync())
+            await _db.RefreshTaskProgressAsync(t.Id);
     }
 
     /// <summary>Отпечаток данных без учёта времени экспорта — «изменилось ли содержимое».</summary>

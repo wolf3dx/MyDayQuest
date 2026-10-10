@@ -2,4 +2,5 @@
 <resources>
     <string name="widget_label">My Day Quest</string>
     <string name="widget_description">Задания из Главного Листа на сегодня</string>
+    <string name="widget_check">Отметить цель выполненной</string>
 </resources>

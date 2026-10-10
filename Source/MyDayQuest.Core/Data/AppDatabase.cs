@@ -236,6 +236,12 @@ public class AppDatabase
             .ToListAsync();
     }
 
+    public async Task<Subtask?> GetSubtaskAsync(int subtaskId)
+    {
+        var db = await GetConnectionAsync();
+        return await db.Table<Subtask>().Where(s => s.Id == subtaskId).FirstOrDefaultAsync();
+    }
+
     public async Task SaveSubtaskAsync(Subtask subtask)
     {
         var db = await GetConnectionAsync();

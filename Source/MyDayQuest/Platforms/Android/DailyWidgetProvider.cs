@@ -18,6 +18,11 @@ public class DailyWidgetProvider : AppWidgetProvider
     /// <summary>Своё намерение: приложение просит перерисовать виджет после правок.</summary>
     public const string ActionRefresh = "mydayquest.widget.REFRESH";
 
+    /// <summary>Нажата галочка у цели — отметить её выполненной.</summary>
+    public const string ActionDone = "mydayquest.widget.DONE";
+
+    private const string ExtraSubtaskId = "subtaskId";
+
     private const int Rows = 4;
 
     public override void OnUpdate(Context? context, AppWidgetManager? manager, int[]? ids)
@@ -33,7 +38,20 @@ public class DailyWidgetProvider : AppWidgetProvider
     public override void OnReceive(Context? context, Intent? intent)
     {
         base.OnReceive(context, intent);
-        if (context is null || intent?.Action != ActionRefresh) return;
+        if (context is null) return;
+
+        if (intent?.Action == ActionDone)
+        {
+            var subtaskId = intent.GetIntExtra(ExtraSubtaskId, 0);
+            if (subtaskId > 0)
+            {
+                var pendingDone = GoAsync();
+                _ = MarkDoneAsync(context, subtaskId).ContinueWith(_ => pendingDone.Finish());
+            }
+            return;
+        }
+
+        if (intent?.Action != ActionRefresh) return;
 
         var manager = AppWidgetManager.GetInstance(context);
         var ids = manager?.GetAppWidgetIds(new ComponentName(context,
@@ -54,6 +72,34 @@ public class DailyWidgetProvider : AppWidgetProvider
         ctx.SendBroadcast(intent);
     }
 
+    /// <summary>
+    /// Отметить цель выполненной и сразу перерисовать виджет. Работает, даже
+    /// когда приложение закрыто: база своя, приложение для этого не нужно.
+    /// </summary>
+    private static async Task MarkDoneAsync(Context ctx, int subtaskId)
+    {
+        try
+        {
+            var db = new AppDatabase(FileSystem.AppDataDirectory);
+            var sub = await db.GetSubtaskAsync(subtaskId);
+            if (sub is null || sub.IsDone) return;
+
+            sub.IsDone = true;
+            await db.SaveSubtaskAsync(sub);          // отметку времени ставит он сам
+            await db.RefreshTaskProgressAsync(sub.TaskId);
+        }
+        catch (Exception ex)
+        {
+            global::Android.Util.Log.Error("MyDayQuest.Widget", ex.ToString());
+        }
+
+        var manager = AppWidgetManager.GetInstance(ctx);
+        var ids = manager?.GetAppWidgetIds(new ComponentName(ctx,
+            Java.Lang.Class.FromType(typeof(DailyWidgetProvider))));
+        if (manager is not null && ids is { Length: > 0 })
+            await RenderAsync(ctx, manager, ids);
+    }
+
     private static async Task RenderAsync(Context ctx, AppWidgetManager manager, int[] ids)
     {
         try
@@ -67,6 +113,9 @@ public class DailyWidgetProvider : AppWidgetProvider
             var titleIds = new[] { Resource.Id.title_0, Resource.Id.title_1, Resource.Id.title_2, Resource.Id.title_3 };
             var subIds = new[] { Resource.Id.sub_0, Resource.Id.sub_1, Resource.Id.sub_2, Resource.Id.sub_3 };
             var rowIds = new[] { Resource.Id.row_0, Resource.Id.row_1, Resource.Id.row_2, Resource.Id.row_3 };
+            var goalRowIds = new[] { Resource.Id.goal_row_0, Resource.Id.goal_row_1, Resource.Id.goal_row_2, Resource.Id.goal_row_3 };
+            var goalIds = new[] { Resource.Id.goal_0, Resource.Id.goal_1, Resource.Id.goal_2, Resource.Id.goal_3 };
+            var checkIds = new[] { Resource.Id.check_0, Resource.Id.check_1, Resource.Id.check_2, Resource.Id.check_3 };
 
             var overdue = tasks.Count(t => t.IsOverdue);
             views.SetTextViewText(Resource.Id.widget_header,
@@ -98,6 +147,30 @@ public class DailyWidgetProvider : AppWidgetProvider
                 views.SetInt(rowIds[i], "setBackgroundResource", t.IsOverdue
                     ? Resource.Drawable.widget_row_overdue_bg
                     : Resource.Drawable.widget_row_bg);
+
+                // Текущая цель задания — первая невыполненная.
+                var subs = await db.GetSubtasksAsync(t.Id);
+                var goal = subs.FirstOrDefault(x => !x.IsDone);
+                if (goal is null)
+                {
+                    views.SetViewVisibility(goalRowIds[i], global::Android.Views.ViewStates.Gone);
+                    continue;
+                }
+
+                views.SetViewVisibility(goalRowIds[i], global::Android.Views.ViewStates.Visible);
+                views.SetTextViewText(goalIds[i], goal.Title);
+                views.SetImageViewResource(checkIds[i], Resource.Drawable.widget_check_off);
+
+                // Своя ссылка у каждой галочки: без неё система считает намерения
+                // одинаковыми и переиспользует первое — отмечалась бы всегда
+                // верхняя цель, чью бы галочку ни нажали.
+                var done = new Intent(ctx, typeof(DailyWidgetProvider));
+                done.SetAction(ActionDone);
+                done.PutExtra(ExtraSubtaskId, goal.Id);
+                done.SetData(global::Android.Net.Uri.Parse($"mydayquest://subtask/{goal.Id}"));
+                var donePending = PendingIntent.GetBroadcast(ctx, goal.Id, done,
+                    PendingIntentFlags.Immutable | PendingIntentFlags.UpdateCurrent);
+                views.SetOnClickPendingIntent(checkIds[i], donePending);
             }
 
             var launch = ctx.PackageManager?.GetLaunchIntentForPackage(ctx.PackageName!);
