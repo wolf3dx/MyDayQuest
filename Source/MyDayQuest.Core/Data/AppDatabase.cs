@@ -163,7 +163,7 @@ public class AppDatabase
     public async Task<List<QuestTask>> GetDailyPlanTasksAsync()
     {
         var db = await GetConnectionAsync();
-        var tasks = await db.Table<QuestTask>().Where(t => t.InDailyPlan)
+        var tasks = await db.Table<QuestTask>().Where(t => t.InDailyPlan && !t.IsDone)
             .OrderBy(t => t.SortOrder).ToListAsync();
         await FillOverdueFactsAsync(tasks);
         return tasks;
@@ -222,7 +222,7 @@ public class AppDatabase
     public async Task<int> CountDailyPlanAsync()
     {
         var db = await GetConnectionAsync();
-        return await db.Table<QuestTask>().Where(t => t.InDailyPlan).CountAsync();
+        return await db.Table<QuestTask>().Where(t => t.InDailyPlan && !t.IsDone).CountAsync();
     }
 
     // ---- Subtasks (подзадания) ----
@@ -282,6 +282,12 @@ public class AppDatabase
         var progress = await ComputeTaskProgressAsync(taskId);
         task.Progress = progress;
         task.IsDone = progress == 100;
+
+        // Выполненное уходит из дневного плана само и освобождает место:
+        // иначе оно продолжало бы занимать один из четырёх слотов, хотя больше
+        // ни на главном экране, ни в виджете не показывается.
+        if (task.IsDone) task.InDailyPlan = false;
+
         await SaveTaskAsync(task);
         return progress;
     }
