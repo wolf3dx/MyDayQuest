@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MyDayQuest.Data;
@@ -36,6 +36,10 @@ public partial class TaskDetailViewModel : ObservableObject
     [ObservableProperty]
     private DateTime _deadline = DateTime.Today.AddDays(1);
 
+    /// <summary>Задание повторяется каждый день — чек-бокс внутри задания.</summary>
+    [ObservableProperty]
+    private bool _isRepeating;
+
     public ObservableCollection<SubtaskVM> Subtasks { get; } = new();
 
     [ObservableProperty]
@@ -61,10 +65,18 @@ public partial class TaskDetailViewModel : ObservableObject
         TaskName = task.Title;
         StartDate = task.StartDate ?? DateTime.Today;
         Deadline = task.Deadline ?? DateTime.Today.AddDays(1);
+        IsRepeating = task.IsRepeating;
 
         Subtasks.Clear();
         foreach (var s in await _db.GetSubtasksAsync(TaskId))
-            Subtasks.Add(Track(new SubtaskVM { Id = s.Id, Title = s.Title, IsDone = s.IsDone }));
+            Subtasks.Add(Track(new SubtaskVM
+            {
+                Id = s.Id,
+                Title = s.Title,
+                IsDone = s.IsDone,
+                HasDue = s.DueDate is not null,
+                DueDate = s.DueDate ?? DateTime.Now.Date,
+            }));
 
         RecalcProgress();
     }
@@ -136,18 +148,26 @@ public partial class TaskDetailViewModel : ObservableObject
             task.Title = string.IsNullOrWhiteSpace(TaskName) ? task.Title : TaskName.Trim();
             task.StartDate = StartDate;
             task.Deadline = Deadline;
+            task.IsRepeating = IsRepeating;
             await _db.SaveTaskAsync(task);
         }
 
         // тексты подзаданий
         var order = 0;
+        var stored = await _db.GetSubtasksAsync(TaskId);
         foreach (var s in Subtasks)
         {
-            await _db.SaveSubtaskAsync(new Subtask
-            {
-                Id = s.Id, TaskId = TaskId, Title = s.Title.Trim(), IsDone = s.IsDone,
-                SortOrder = order++,
-            });
+            // Правим существующую строку, а не собираем новую: иначе затираются
+            // поля, которых нет на экране, — Uid (а по нему идёт слияние при
+            // синхронизации) и отметка времени выполнения.
+            var row = stored.FirstOrDefault(x => x.Id == s.Id)
+                      ?? new Subtask { Id = s.Id, TaskId = TaskId };
+
+            row.Title = s.Title.Trim();
+            row.IsDone = s.IsDone;
+            row.DueDate = s.HasDue ? s.DueDate.Date : null;
+            row.SortOrder = order++;
+            await _db.SaveSubtaskAsync(row);
         }
 
         await _db.RefreshTaskProgressAsync(TaskId);

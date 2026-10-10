@@ -91,8 +91,8 @@ public class DailyWidgetProvider : AppWidgetProvider
                 views.SetViewVisibility(rowIds[i], global::Android.Views.ViewStates.Visible);
                 views.SetTextViewText(titleIds[i], t.Title);
                 views.SetTextViewText(subIds[i], t.IsOverdue
-                    ? $"{list} · не сделано с {t.PlannedForDate:dd.MM.yy}"
-                    : $"{list} · {t.Progress} %");
+                    ? $"{list} · не сделано с {t.OverdueSince:dd.MM.yy}"
+                    : $"{list} · {t.Progress} %{(t.IsRepeating ? " · каждый день" : string.Empty)}");
 
                 // Просроченное выделяется и здесь — красной рамкой, как в приложении.
                 views.SetInt(rowIds[i], "setBackgroundResource", t.IsOverdue

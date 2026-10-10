@@ -43,7 +43,7 @@ public class SyncService
                 {
                     Uid = t.Uid, Title = t.Title, StartDate = t.StartDate, Deadline = t.Deadline,
                     Progress = t.Progress, IsDone = t.IsDone, InDailyPlan = t.InDailyPlan,
-                    PlannedForDate = t.PlannedForDate,
+                    PlannedForDate = t.PlannedForDate, IsRepeating = t.IsRepeating,
                     SortOrder = t.SortOrder, UpdatedUtc = t.UpdatedUtc,
                 };
                 foreach (var s in allSubs.Where(x => x.TaskId == t.Id).OrderBy(x => x.SortOrder))
@@ -51,6 +51,7 @@ public class SyncService
                     tDto.Subtasks.Add(new SyncSubtask
                     {
                         Uid = s.Uid, Title = s.Title, IsDone = s.IsDone,
+                        DoneUtc = s.DoneUtc, DueDate = s.DueDate,
                         SortOrder = s.SortOrder, UpdatedUtc = s.UpdatedUtc,
                     });
                 }
@@ -86,6 +87,7 @@ public class SyncService
                     QuestId = questId, QuestUid = q.Uid, Title = t.Title,
                     StartDate = t.StartDate, Deadline = t.Deadline, Progress = t.Progress,
                     IsDone = t.IsDone, InDailyPlan = t.InDailyPlan, PlannedForDate = t.PlannedForDate,
+                    IsRepeating = t.IsRepeating,
                     SortOrder = t.SortOrder,
                     UpdatedUtc = t.UpdatedUtc == default ? DateTime.UtcNow : t.UpdatedUtc,
                 });
@@ -96,6 +98,7 @@ public class SyncService
                     {
                         Uid = string.IsNullOrEmpty(s.Uid) ? Guid.NewGuid().ToString() : s.Uid,
                         TaskId = taskId, TaskUid = t.Uid, Title = s.Title, IsDone = s.IsDone,
+                        DoneUtc = s.DoneUtc, DueDate = s.DueDate,
                         SortOrder = s.SortOrder,
                         UpdatedUtc = s.UpdatedUtc == default ? DateTime.UtcNow : s.UpdatedUtc,
                     });

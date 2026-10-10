@@ -31,6 +31,13 @@ public class ReminderReceiver : BroadcastReceiver
         {
             var db = new AppDatabase(FileSystem.AppDataDirectory);
             var tasks = await db.GetDailyPlanTasksAsync();
+
+            // Повторяющееся задание напоминает о себе каждый день само по себе —
+            // его для этого не обязательно ставить в дневной план.
+            foreach (var repeating in await db.GetRepeatingTasksAsync())
+                if (tasks.All(t => t.Id != repeating.Id))
+                    tasks.Add(repeating);
+
             var names = await db.GetQuestNamesAsync();
 
             if (tasks.Count == 0)
@@ -47,9 +54,10 @@ public class ReminderReceiver : BroadcastReceiver
             var lines = tasks.Select(t =>
             {
                 var list = names.TryGetValue(t.QuestId, out var n) ? n : "—";
+                var mark = t.IsRepeating ? " · каждый день" : string.Empty;
                 return t.IsOverdue
-                    ? $"❗ {t.Title} ({list}) — не сделано вовремя"
-                    : $"• {t.Title} ({list})";
+                    ? $"❗ {t.Title} ({list}){mark} — не сделано вовремя"
+                    : $"• {t.Title} ({list}){mark}";
             }).ToList();
 
             var style = new NotificationCompat.InboxStyle().SetBigContentTitle(title);

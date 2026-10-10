@@ -31,6 +31,17 @@
                         <DatePicker Grid.Column="1" Date="{Binding Deadline}" Format="dd.MM.yy" HorizontalOptions="Start" />
                     </Grid>
 
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                        <CheckBox Grid.Column="0" IsChecked="{Binding IsRepeating}"
+                                  Color="{DynamicResource QuestInk}" VerticalOptions="Center" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                            <Label Text="Повторять каждый день"
+                                   TextColor="{DynamicResource QuestInk}" FontAttributes="Bold" />
+                            <Label Text="О задании будут напоминать ежедневно, пока оно не выполнено."
+                                   TextColor="{DynamicResource QuestInkSoft}" FontSize="12" LineHeight="1.2" />
+                        </VerticalStackLayout>
+                    </Grid>
+
                     <Grid ColumnDefinitions="120,*,Auto" ColumnSpacing="8">
                         <Label Text="Progres:" TextColor="{DynamicResource QuestInk}" FontAttributes="Bold" VerticalOptions="Center" />
                         <ProgressBar Grid.Column="1" ProgressColor="{DynamicResource QuestGold}"
@@ -67,13 +78,30 @@
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TaskDetailViewModel}}, Path=SelectSubtaskCommand}"
                                 CommandParameter="{Binding .}" />
                         </Border.GestureRecognizers>
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <CheckBox Grid.Column="0"
+                        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                            <CheckBox Grid.Row="0" Grid.Column="0"
                                       IsChecked="{Binding IsDone}"
                                       VerticalOptions="Center" />
-                            <Entry Grid.Column="1" Text="{Binding Title}" Placeholder="Цель задания"
+                            <Entry Grid.Row="0" Grid.Column="1" Text="{Binding Title}" Placeholder="Цель задания"
                                    TextColor="{DynamicResource QuestInk}"
                                    VerticalOptions="Center" />
+
+                            <!-- Срок: без галочки дата не учитывается, иначе DatePicker
+                                 сделал бы срочным каждое подзадание. -->
+                            <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="6">
+                                <CheckBox IsChecked="{Binding HasDue}"
+                                          Color="{DynamicResource QuestInk}" VerticalOptions="Center" />
+                                <Label Text="к дате" TextColor="{DynamicResource QuestInkSoft}"
+                                       FontSize="13" VerticalOptions="Center" />
+                                <DatePicker Date="{Binding DueDate}" Format="dd.MM.yy"
+                                            IsVisible="{Binding HasDue}"
+                                            TextColor="{DynamicResource QuestInk}"
+                                            VerticalOptions="Center" />
+                                <Label Text="срок прошёл" IsVisible="{Binding IsMissed}"
+                                       TextColor="{DynamicResource QuestRed}"
+                                       FontAttributes="Bold" FontSize="12"
+                                       VerticalOptions="Center" />
+                            </HorizontalStackLayout>
                         </Grid>
                     </Border>
                 </DataTemplate>

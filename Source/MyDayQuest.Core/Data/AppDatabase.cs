@@ -53,6 +53,12 @@ public class AppDatabase
         await db.ExecuteAsync("UPDATE quest_tasks SET QuestUid = '' WHERE QuestUid IS NULL");
         await db.ExecuteAsync("UPDATE subtasks SET TaskUid = '' WHERE TaskUid IS NULL");
 
+        // Выполненным подзаданиям без отметки времени ставим «давно»: точного
+        // дня мы не знаем, а сегодняшний соврал бы, будто шаг только что сделан.
+        await db.ExecuteAsync(
+            "UPDATE subtasks SET DoneUtc = ? WHERE IsDone = 1 AND DoneUtc IS NULL",
+            DateTime.UtcNow.AddDays(-1).Ticks);
+
         // Заданиям, стоявшим в плане до появления даты, ставим сегодняшний день:
         // иначе они все разом окажутся просроченными и покраснеют на пустом месте.
         await db.ExecuteAsync(
@@ -104,13 +110,16 @@ public class AppDatabase
 
     // ---- Tasks (задачи) ----
 
+    /// <summary>Задания листа, уже со сведениями для подсветки просрочки.</summary>
     public async Task<List<QuestTask>> GetTasksAsync(int questId)
     {
         var db = await GetConnectionAsync();
-        return await db.Table<QuestTask>()
+        var tasks = await db.Table<QuestTask>()
             .Where(t => t.QuestId == questId)
             .OrderBy(t => t.SortOrder)
             .ToListAsync();
+        await FillOverdueFactsAsync(tasks);
+        return tasks;
     }
 
     /// <summary>Текущая задача листа — первая невыполненная по порядку («задание на сегодня»).</summary>
@@ -154,8 +163,53 @@ public class AppDatabase
     public async Task<List<QuestTask>> GetDailyPlanTasksAsync()
     {
         var db = await GetConnectionAsync();
-        return await db.Table<QuestTask>().Where(t => t.InDailyPlan)
+        var tasks = await db.Table<QuestTask>().Where(t => t.InDailyPlan)
             .OrderBy(t => t.SortOrder).ToListAsync();
+        await FillOverdueFactsAsync(tasks);
+        return tasks;
+    }
+
+    /// <summary>Задания, которые повторяются каждый день и ещё не выполнены.</summary>
+    public async Task<List<QuestTask>> GetRepeatingTasksAsync()
+    {
+        var db = await GetConnectionAsync();
+        var tasks = await db.Table<QuestTask>().Where(t => t.IsRepeating && !t.IsDone)
+            .OrderBy(t => t.SortOrder).ToListAsync();
+        await FillOverdueFactsAsync(tasks);
+        return tasks;
+    }
+
+    /// <summary>
+    /// Дозаполнить задания сведениями о подзаданиях: есть ли они, когда был
+    /// последний выполненный шаг и нет ли пропущенного срока. Эти поля в таблице
+    /// не хранятся — по ним считается просрочка.
+    /// Один запрос на все задания сразу: по запросу на каждое превратило бы
+    /// открытие листа в десяток походов в базу.
+    /// </summary>
+    public async Task FillOverdueFactsAsync(IList<QuestTask> tasks)
+    {
+        if (tasks.Count == 0) return;
+
+        var db = await GetConnectionAsync();
+        var ids = tasks.Select(t => t.Id).ToHashSet();
+        var all = await db.Table<Subtask>().ToListAsync();
+        var today = DateTime.Now.Date;
+
+        foreach (var task in tasks)
+        {
+            var subs = all.Where(x => x.TaskId == task.Id).ToList();
+            task.HasSubtasks = subs.Count > 0;
+
+            var done = subs.Where(x => x.IsDone && x.DoneUtc is not null)
+                           .Select(x => x.DoneUtc!.Value.ToLocalTime().Date)
+                           .ToList();
+            task.LastProgressDate = done.Count > 0 ? done.Max() : null;
+
+            var missed = subs.Where(x => !x.IsDone && x.DueDate is { } due && due.Date < today)
+                             .Select(x => x.DueDate!.Value.Date)
+                             .ToList();
+            task.MissedDueDate = missed.Count > 0 ? missed.Min() : null;
+        }
     }
 
     /// <summary>Имена листов по их Id — чтобы не тянуть листы целиком.</summary>
@@ -186,6 +240,12 @@ public class AppDatabase
     {
         var db = await GetConnectionAsync();
         subtask.UpdatedUtc = DateTime.UtcNow;
+
+        // Отметку времени ставим здесь, а не у каждого вызывающего: иначе
+        // «когда это было сделано» зависело бы от того, каким путём отметили.
+        if (subtask.IsDone && subtask.DoneUtc is null) subtask.DoneUtc = DateTime.UtcNow;
+        if (!subtask.IsDone) subtask.DoneUtc = null;
+
         if (string.IsNullOrEmpty(subtask.Uid)) subtask.Uid = Guid.NewGuid().ToString();
         if (subtask.Id == 0)
             await db.InsertAsync(subtask);

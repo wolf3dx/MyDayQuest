@@ -28,6 +28,7 @@ public class SyncTask
     public bool IsDone { get; set; }
     public bool InDailyPlan { get; set; }
     public DateTime? PlannedForDate { get; set; }
+    public bool IsRepeating { get; set; }
     public int SortOrder { get; set; }
     public DateTime UpdatedUtc { get; set; }
     public List<SyncSubtask> Subtasks { get; set; } = new();
@@ -38,6 +39,8 @@ public class SyncSubtask
     public string Uid { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public bool IsDone { get; set; }
+    public DateTime? DoneUtc { get; set; }
+    public DateTime? DueDate { get; set; }
     public int SortOrder { get; set; }
     public DateTime UpdatedUtc { get; set; }
 }

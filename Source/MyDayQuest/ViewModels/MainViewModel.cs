@@ -192,7 +192,7 @@ public partial class MainViewModel : ObservableObject
                 CurrentSubtaskId = current?.Id,
                 CurrentSubtaskText = current?.Title ?? string.Empty,
                 HasCurrentSubtask = current is not null,
-                PlannedForDate = task.PlannedForDate,
+                PlannedForDate = task.OverdueSince,
                 IsOverdue = task.IsOverdue,
             });
         }

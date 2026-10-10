@@ -1,4 +1,4 @@
-using SQLite;
+﻿using SQLite;
 
 namespace MyDayQuest.Models;
 
@@ -25,6 +25,18 @@ public class Subtask
     public string Title { get; set; } = string.Empty;
 
     public bool IsDone { get; set; }
+
+    /// <summary>
+    /// Когда отмечено выполненным. По нему видно, был ли за сутки хоть какой-то
+    /// шаг: без этого «ничего не сделано за день» не отличить от «сделано давно».
+    /// </summary>
+    public DateTime? DoneUtc { get; set; }
+
+    /// <summary>
+    /// Срок: день, к которому подзадание должно быть выполнено. Необязателен.
+    /// Миновал, а подзадание не отмечено — задание краснеет.
+    /// </summary>
+    public DateTime? DueDate { get; set; }
 
     public int SortOrder { get; set; }
 

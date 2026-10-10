@@ -1,4 +1,4 @@
-using SQLite;
+﻿using SQLite;
 
 namespace MyDayQuest.Models;
 
@@ -51,10 +51,63 @@ public class QuestTask
     /// </summary>
     public DateTime? PlannedForDate { get; set; }
 
-    /// <summary>Задание в плане со вчера и раньше и до сих пор не выполнено.</summary>
+    /// <summary>
+    /// Повторяется каждый день — чек-бокс внутри задания. Подзадания при этом
+    /// не сбрасываются; повтор означает, что о задании напоминают ежедневно,
+    /// пока оно не выполнено целиком.
+    /// </summary>
+    public bool IsRepeating { get; set; }
+
+    // ---- Поля ниже заполняет слой данных, в таблице их нет ----
+
+    /// <summary>Есть ли у задания подзадания. Без них просрочки не бывает.</summary>
     [Ignore]
-    public bool IsOverdue => InDailyPlan && !IsDone
-                             && PlannedForDate is { } d && d.Date < DateTime.Now.Date;
+    public bool HasSubtasks { get; set; }
+
+    /// <summary>День последнего выполненного подзадания, если такой был.</summary>
+    [Ignore]
+    public DateTime? LastProgressDate { get; set; }
+
+    /// <summary>Самый ранний пропущенный срок подзадания, если такой есть.</summary>
+    [Ignore]
+    public DateTime? MissedDueDate { get; set; }
+
+    /// <summary>Есть ли подзадание с миновавшим сроком, которое не выполнено.</summary>
+    [Ignore]
+    public bool HasMissedSubtaskDue => MissedDueDate is not null;
+
+    /// <summary>
+    /// Задание просрочено и подсвечивается красным.
+    ///
+    /// Два повода. Первый: у подзадания стоял срок, он миновал, а подзадание не
+    /// отмечено. Второй: сутки прошли впустую — последний шаг был раньше вчера,
+    /// а если шагов не было вовсе, то уже прошёл день постановки в план.
+    /// Вчерашний день не в счёт: сегодняшние сутки ещё не кончились.
+    ///
+    /// Задание без подзаданий просрочкой не считается — отмечать в нём нечего.
+    /// </summary>
+    [Ignore]
+    public bool IsOverdue
+    {
+        get
+        {
+            if (IsDone || !HasSubtasks) return false;
+            if (HasMissedSubtaskDue) return true;
+            if (!InDailyPlan) return false;
+
+            var today = DateTime.Now.Date;
+            return LastProgressDate is { } last
+                ? last.Date < today.AddDays(-1)
+                : PlannedForDate is { } planned && planned.Date < today;
+        }
+    }
+
+    /// <summary>
+    /// С какого дня задание висит — для подписи на плашке. Пропущенный срок
+    /// важнее остального: он и есть названная пользователем дата.
+    /// </summary>
+    [Ignore]
+    public DateTime? OverdueSince => MissedDueDate ?? LastProgressDate ?? PlannedForDate;
 
     /// <summary>Время последнего изменения (для слияния при синхронизации).</summary>
     public DateTime UpdatedUtc { get; set; } = DateTime.UtcNow;
