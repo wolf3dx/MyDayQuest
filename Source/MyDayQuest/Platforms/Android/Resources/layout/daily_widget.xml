@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Виджет «Задания на сегодня».
-  Строк ровно четыре — столько же, сколько влезает в дневной план (DailyTaskLimit).
-  Поэтому список статический: отдельный поставщик строк тут был бы лишней
-  машинерией ради заведомо известного числа.
+  Список, а не столбик фиксированных строк: столбик не прокручивается, и при
+  уменьшении виджета нижние задания просто обрезались бы.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:id="@+id/widget_root"
@@ -39,164 +38,18 @@
     <TextView
         android:id="@+id/widget_empty"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:text="Журнал заданий пуст"
         android:textColor="#9A8A6A"
         android:textSize="14sp"
-        android:gravity="center"
-        android:paddingTop="16dp"
-        android:visibility="gone" />
+        android:gravity="center_horizontal"
+        android:paddingTop="16dp" />
 
-    <LinearLayout
-        android:id="@+id/row_0"
+    <ListView
+        android:id="@+id/widget_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/widget_row_bg"
-        android:padding="10dp"
-        android:layout_marginBottom="6dp"
-        android:visibility="gone">
-        <TextView android:id="@+id/title_0"
-                  android:layout_width="match_parent" android:layout_height="wrap_content"
-                  android:textColor="#2A1F12" android:textSize="15sp" android:textStyle="bold"
-                  android:maxLines="2" android:ellipsize="end" />
-        <TextView android:id="@+id/sub_0"
-                  android:layout_width="match_parent" android:layout_height="wrap_content"
-                  android:textColor="#6B5537" android:textSize="12sp"
-                  android:maxLines="1" android:ellipsize="end" />
-
-        <!-- Текущая цель задания: галочку можно нажать прямо отсюда. -->
-        <LinearLayout android:id="@+id/goal_row_0"
-                      android:layout_width="match_parent" android:layout_height="wrap_content"
-                      android:orientation="horizontal"
-                      android:layout_marginTop="6dp"
-                      android:gravity="center_vertical"
-                      android:visibility="gone">
-            <ImageView android:id="@+id/check_0"
-                       android:layout_width="34dp" android:layout_height="34dp"
-                       android:padding="6dp"
-                       android:contentDescription="@string/widget_check"
-                       android:src="@drawable/widget_check_off" />
-            <TextView android:id="@+id/goal_0"
-                      android:layout_width="match_parent" android:layout_height="wrap_content"
-                      android:layout_marginStart="4dp"
-                      android:textColor="#2A1F12" android:textSize="13sp"
-                      android:maxLines="1" android:ellipsize="end" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/row_1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/widget_row_bg"
-        android:padding="10dp"
-        android:layout_marginBottom="6dp"
-        android:visibility="gone">
-        <TextView android:id="@+id/title_1"
-                  android:layout_width="match_parent" android:layout_height="wrap_content"
-                  android:textColor="#2A1F12" android:textSize="15sp" android:textStyle="bold"
-                  android:maxLines="2" android:ellipsize="end" />
-        <TextView android:id="@+id/sub_1"
-                  android:layout_width="match_parent" android:layout_height="wrap_content"
-                  android:textColor="#6B5537" android:textSize="12sp"
-                  android:maxLines="1" android:ellipsize="end" />
-
-        <!-- Текущая цель задания: галочку можно нажать прямо отсюда. -->
-        <LinearLayout android:id="@+id/goal_row_1"
-                      android:layout_width="match_parent" android:layout_height="wrap_content"
-                      android:orientation="horizontal"
-                      android:layout_marginTop="6dp"
-                      android:gravity="center_vertical"
-                      android:visibility="gone">
-            <ImageView android:id="@+id/check_1"
-                       android:layout_width="34dp" android:layout_height="34dp"
-                       android:padding="6dp"
-                       android:contentDescription="@string/widget_check"
-                       android:src="@drawable/widget_check_off" />
-            <TextView android:id="@+id/goal_1"
-                      android:layout_width="match_parent" android:layout_height="wrap_content"
-                      android:layout_marginStart="4dp"
-                      android:textColor="#2A1F12" android:textSize="13sp"
-                      android:maxLines="1" android:ellipsize="end" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/row_2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/widget_row_bg"
-        android:padding="10dp"
-        android:layout_marginBottom="6dp"
-        android:visibility="gone">
-        <TextView android:id="@+id/title_2"
-                  android:layout_width="match_parent" android:layout_height="wrap_content"
-                  android:textColor="#2A1F12" android:textSize="15sp" android:textStyle="bold"
-                  android:maxLines="2" android:ellipsize="end" />
-        <TextView android:id="@+id/sub_2"
-                  android:layout_width="match_parent" android:layout_height="wrap_content"
-                  android:textColor="#6B5537" android:textSize="12sp"
-                  android:maxLines="1" android:ellipsize="end" />
-
-        <!-- Текущая цель задания: галочку можно нажать прямо отсюда. -->
-        <LinearLayout android:id="@+id/goal_row_2"
-                      android:layout_width="match_parent" android:layout_height="wrap_content"
-                      android:orientation="horizontal"
-                      android:layout_marginTop="6dp"
-                      android:gravity="center_vertical"
-                      android:visibility="gone">
-            <ImageView android:id="@+id/check_2"
-                       android:layout_width="34dp" android:layout_height="34dp"
-                       android:padding="6dp"
-                       android:contentDescription="@string/widget_check"
-                       android:src="@drawable/widget_check_off" />
-            <TextView android:id="@+id/goal_2"
-                      android:layout_width="match_parent" android:layout_height="wrap_content"
-                      android:layout_marginStart="4dp"
-                      android:textColor="#2A1F12" android:textSize="13sp"
-                      android:maxLines="1" android:ellipsize="end" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/row_3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/widget_row_bg"
-        android:padding="10dp"
-        android:layout_marginBottom="6dp"
-        android:visibility="gone">
-        <TextView android:id="@+id/title_3"
-                  android:layout_width="match_parent" android:layout_height="wrap_content"
-                  android:textColor="#2A1F12" android:textSize="15sp" android:textStyle="bold"
-                  android:maxLines="2" android:ellipsize="end" />
-        <TextView android:id="@+id/sub_3"
-                  android:layout_width="match_parent" android:layout_height="wrap_content"
-                  android:textColor="#6B5537" android:textSize="12sp"
-                  android:maxLines="1" android:ellipsize="end" />
-
-        <!-- Текущая цель задания: галочку можно нажать прямо отсюда. -->
-        <LinearLayout android:id="@+id/goal_row_3"
-                      android:layout_width="match_parent" android:layout_height="wrap_content"
-                      android:orientation="horizontal"
-                      android:layout_marginTop="6dp"
-                      android:gravity="center_vertical"
-                      android:visibility="gone">
-            <ImageView android:id="@+id/check_3"
-                       android:layout_width="34dp" android:layout_height="34dp"
-                       android:padding="6dp"
-                       android:contentDescription="@string/widget_check"
-                       android:src="@drawable/widget_check_off" />
-            <TextView android:id="@+id/goal_3"
-                      android:layout_width="match_parent" android:layout_height="wrap_content"
-                      android:layout_marginStart="4dp"
-                      android:textColor="#2A1F12" android:textSize="13sp"
-                      android:maxLines="1" android:ellipsize="end" />
-        </LinearLayout>
-    </LinearLayout>
+        android:layout_height="match_parent"
+        android:divider="@null"
+        android:dividerHeight="0dp" />
 
 </LinearLayout>

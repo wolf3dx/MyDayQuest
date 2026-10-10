@@ -21,7 +21,7 @@ public class DailyWidgetProvider : AppWidgetProvider
     /// <summary>Нажата галочка у цели — отметить её выполненной.</summary>
     public const string ActionDone = "mydayquest.widget.DONE";
 
-    private const string ExtraSubtaskId = "subtaskId";
+    public const string ExtraSubtaskId = "subtaskId";
 
     private const int Rows = 4;
 
@@ -106,82 +106,43 @@ public class DailyWidgetProvider : AppWidgetProvider
         {
             var db = new AppDatabase(FileSystem.AppDataDirectory);
             var tasks = await db.GetDailyPlanTasksAsync();
-            var names = await db.GetQuestNamesAsync();
-
-            var views = new RemoteViews(ctx.PackageName, Resource.Layout.daily_widget);
-
-            var titleIds = new[] { Resource.Id.title_0, Resource.Id.title_1, Resource.Id.title_2, Resource.Id.title_3 };
-            var subIds = new[] { Resource.Id.sub_0, Resource.Id.sub_1, Resource.Id.sub_2, Resource.Id.sub_3 };
-            var rowIds = new[] { Resource.Id.row_0, Resource.Id.row_1, Resource.Id.row_2, Resource.Id.row_3 };
-            var goalRowIds = new[] { Resource.Id.goal_row_0, Resource.Id.goal_row_1, Resource.Id.goal_row_2, Resource.Id.goal_row_3 };
-            var goalIds = new[] { Resource.Id.goal_0, Resource.Id.goal_1, Resource.Id.goal_2, Resource.Id.goal_3 };
-            var checkIds = new[] { Resource.Id.check_0, Resource.Id.check_1, Resource.Id.check_2, Resource.Id.check_3 };
+            foreach (var repeating in await db.GetRepeatingTasksAsync())
+                if (tasks.All(t => t.Id != repeating.Id))
+                    tasks.Add(repeating);
 
             var overdue = tasks.Count(t => t.IsOverdue);
-            views.SetTextViewText(Resource.Id.widget_header,
-                overdue > 0
+            var header = tasks.Count == 0
+                ? "ЗАДАНИЯ НА СЕГОДНЯ"
+                : overdue > 0
                     ? $"НА СЕГОДНЯ: {tasks.Count} · ПРОСРОЧЕНО {overdue}"
-                    : tasks.Count > 0 ? $"ЗАДАНИЯ НА СЕГОДНЯ: {tasks.Count}" : "ЗАДАНИЯ НА СЕГОДНЯ");
+                    : $"ЗАДАНИЯ НА СЕГОДНЯ: {tasks.Count}";
 
-            views.SetViewVisibility(Resource.Id.widget_empty,
-                tasks.Count == 0 ? global::Android.Views.ViewStates.Visible : global::Android.Views.ViewStates.Gone);
+            var views = new RemoteViews(ctx.PackageName, Resource.Layout.daily_widget);
+            views.SetTextViewText(Resource.Id.widget_header, header);
 
-            for (var i = 0; i < Rows; i++)
-            {
-                if (i >= tasks.Count)
-                {
-                    views.SetViewVisibility(rowIds[i], global::Android.Views.ViewStates.Gone);
-                    continue;
-                }
+            // Список наполняет служба строк.
+            var service = new Intent(ctx, typeof(DailyWidgetService));
+            views.SetRemoteAdapter(Resource.Id.widget_list, service);
+            views.SetEmptyView(Resource.Id.widget_list, Resource.Id.widget_empty);
 
-                var t = tasks[i];
-                var list = names.TryGetValue(t.QuestId, out var n) ? n : "—";
-
-                views.SetViewVisibility(rowIds[i], global::Android.Views.ViewStates.Visible);
-                views.SetTextViewText(titleIds[i], t.Title);
-                views.SetTextViewText(subIds[i], t.IsOverdue
-                    ? $"{list} · не сделано с {t.OverdueSince:dd.MM.yy}"
-                    : $"{list} · {t.Progress} %{(t.IsRepeating ? " · каждый день" : string.Empty)}");
-
-                // Просроченное выделяется и здесь — красной рамкой, как в приложении.
-                views.SetInt(rowIds[i], "setBackgroundResource", t.IsOverdue
-                    ? Resource.Drawable.widget_row_overdue_bg
-                    : Resource.Drawable.widget_row_bg);
-
-                // Текущая цель задания — первая невыполненная.
-                var subs = await db.GetSubtasksAsync(t.Id);
-                var goal = subs.FirstOrDefault(x => !x.IsDone);
-                if (goal is null)
-                {
-                    views.SetViewVisibility(goalRowIds[i], global::Android.Views.ViewStates.Gone);
-                    continue;
-                }
-
-                views.SetViewVisibility(goalRowIds[i], global::Android.Views.ViewStates.Visible);
-                views.SetTextViewText(goalIds[i], goal.Title);
-                views.SetImageViewResource(checkIds[i], Resource.Drawable.widget_check_off);
-
-                // Своя ссылка у каждой галочки: без неё система считает намерения
-                // одинаковыми и переиспользует первое — отмечалась бы всегда
-                // верхняя цель, чью бы галочку ни нажали.
-                var done = new Intent(ctx, typeof(DailyWidgetProvider));
-                done.SetAction(ActionDone);
-                done.PutExtra(ExtraSubtaskId, goal.Id);
-                done.SetData(global::Android.Net.Uri.Parse($"mydayquest://subtask/{goal.Id}"));
-                var donePending = PendingIntent.GetBroadcast(ctx, goal.Id, done,
-                    PendingIntentFlags.Immutable | PendingIntentFlags.UpdateCurrent);
-                views.SetOnClickPendingIntent(checkIds[i], donePending);
-            }
+            // Одна заготовка намерения на весь список: строка лишь дополняет её
+            // своим номером цели. Своё намерение на строку система не разрешает.
+            var template = new Intent(ctx, typeof(DailyWidgetProvider));
+            template.SetAction(ActionDone);
+            var templatePending = PendingIntent.GetBroadcast(ctx, 0, template,
+                PendingIntentFlags.Mutable | PendingIntentFlags.UpdateCurrent);
+            views.SetPendingIntentTemplate(Resource.Id.widget_list, templatePending);
 
             var launch = ctx.PackageManager?.GetLaunchIntentForPackage(ctx.PackageName!);
             if (launch is not null)
             {
                 var open = PendingIntent.GetActivity(ctx, 0, launch,
                     PendingIntentFlags.Immutable | PendingIntentFlags.UpdateCurrent);
-                views.SetOnClickPendingIntent(Resource.Id.widget_root, open);
+                views.SetOnClickPendingIntent(Resource.Id.widget_header, open);
             }
 
             manager.UpdateAppWidget(ids, views);
+            manager.NotifyAppWidgetViewDataChanged(ids, Resource.Id.widget_list);
         }
         catch (Exception ex)
         {
