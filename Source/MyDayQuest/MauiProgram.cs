@@ -10,6 +10,10 @@ public static class MauiProgram
 {
 	public static MauiApp CreateMauiApp()
 	{
+		// Голова сама сообщает свою версию: на Android у процесса нет «входной»
+		// сборки, и без этого проверка обновлений брала бы версию у ядра.
+		AppVersion.Reported = AppInfo.Current.VersionString;
+
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()

@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
 using System.Text;
 using CommunityToolkit.Maui.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -135,9 +136,27 @@ public partial class MainViewModel : ObservableObject
 
     private async Task ApplyAndroidUpdateAsync(UpdateInfo up)
     {
-        var url = UpdateService.RawAssetUrl(up.Tag, "MyDayQuest-android.apk");
+#if ANDROID
+        // Ставить пакеты нам должен разрешить сам пользователь. Без этого
+        // установщик закрывается молча, и обновление выглядит сломанным.
+        if (!Platforms.Android.Installer.CanInstall)
+        {
+            var go = await Shell.Current.DisplayAlertAsync("Обновление",
+                "Чтобы поставить обновление, разрешите установку из этого приложения.",
+                "Открыть настройки", "Отмена");
+            if (go) Platforms.Android.Installer.OpenPermissionSettings();
+            return;
+        }
+#endif
+
+        // Выпуск собирается двумя пакетами; берём тот, что подходит процессору,
+        // иначе на x86_64 (эмулятор) приехал бы arm64 и установка сорвалась бы.
+        var file = RuntimeInformation.ProcessArchitecture == Architecture.X64
+            ? "MyDayQuest-android-x64.apk"
+            : "MyDayQuest-android.apk";
+
         var apk = Path.Combine(FileSystem.CacheDirectory, "MyDayQuest-update.apk");
-        await UpdateService.DownloadAsync(url, apk);
+        await UpdateService.DownloadAsync(UpdateService.RawAssetUrl(up.Tag, file), apk);
         // Открыть системный установщик APK (пользователь подтверждает установку).
         await Launcher.Default.OpenAsync(new OpenFileRequest
         {

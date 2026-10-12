@@ -8,4 +8,7 @@
 	<!-- Взвести напоминание после перезагрузки. Приёмник объявлен выключенным
 	     и включается, только если пользователь сам разрешил это в настройках. -->
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+	<!-- Поставить скачанное обновление. Без этого системный установщик молча
+	     закрывается: он отказывает тому, кто разрешение не объявил. -->
+	<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 </manifest>

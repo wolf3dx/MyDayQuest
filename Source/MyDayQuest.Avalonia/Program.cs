@@ -1,5 +1,8 @@
 ﻿using Avalonia;
 using System;
+using System.Reflection;
+
+using MyDayQuest;
 
 namespace MyDayQuest.Avalonia;
 
@@ -11,6 +14,10 @@ class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        AppVersion.Reported = typeof(Program).Assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion;
+
         SQLitePCL.Batteries_V2.Init();
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
