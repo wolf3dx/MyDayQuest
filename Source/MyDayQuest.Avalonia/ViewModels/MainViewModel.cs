@@ -90,6 +90,21 @@ public partial class MainViewModel : ObservableObject
     }
 
     public ObservableCollection<QuestTabVM> Tabs { get; } = new();
+
+    /// <summary>
+    /// Перенести закладку листа на место другой. Меняется только порядок:
+    /// что открыто и что выделено, остаётся как было.
+    /// </summary>
+    public async Task MoveTabAsync(QuestTabVM moved, QuestTabVM target)
+    {
+        var from = Tabs.IndexOf(moved);
+        var to = Tabs.IndexOf(target);
+        if (from < 0 || to < 0 || from == to) return;
+
+        Tabs.Move(from, to);
+        await _db.SaveQuestOrderAsync(Tabs.Select(t => t.QuestId).ToList());
+    }
+
     public ObservableCollection<TaskCardVM> CurrentTasks { get; } = new();
     public ObservableCollection<DailyCardVM> DailyItems { get; } = new();
 

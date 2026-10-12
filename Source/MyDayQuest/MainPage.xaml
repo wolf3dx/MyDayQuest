@@ -347,11 +347,29 @@
                                         <Setter Property="StrokeThickness" Value="3" />
                                         <Setter Property="Stroke" Value="{DynamicResource QuestSelect}" />
                                     </DataTrigger>
+                                    <!-- Закладка, на место которой сейчас метят. Идёт после
+                                         выделения: при совпадении побеждает последний признак. -->
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsDropTarget}" Value="True">
+                                        <Setter Property="StrokeThickness" Value="3" />
+                                        <Setter Property="Stroke" Value="{DynamicResource QuestGreen}" />
+                                    </DataTrigger>
                                 </Border.Triggers>
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=OpenTabCommand}"
                                         CommandParameter="{Binding .}" />
+                                    <!-- Долгое нажатие берёт закладку, отпускание на соседней
+                                         меняет их местами. -->
+                                    <DragGestureRecognizer
+                                        DragStartingCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=BeginTabDragCommand}"
+                                        DragStartingCommandParameter="{Binding .}" />
+                                    <DropGestureRecognizer AllowDrop="True"
+                                        DragOverCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=TabDragOverCommand}"
+                                        DragOverCommandParameter="{Binding .}"
+                                        DragLeaveCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=TabDragLeaveCommand}"
+                                        DragLeaveCommandParameter="{Binding .}"
+                                        DropCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=DropTabCommand}"
+                                        DropCommandParameter="{Binding .}" />
                                 </Border.GestureRecognizers>
                                 <Grid>
                                     <!-- Fill + выравнивание по центру: иначе на Android длинное

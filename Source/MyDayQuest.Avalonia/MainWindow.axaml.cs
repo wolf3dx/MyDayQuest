@@ -31,6 +31,15 @@ public partial class MainWindow : Window
         _vm.OpenUrl = async u => { var tl = GetTopLevel(this); if (tl is not null) await tl.Launcher.LaunchUriAsync(new System.Uri(u)); };
         _vm.OpenTaskDetail = OpenTaskDetailAsync;
 
+        // Закладку берём за любое место — поля ввода на ней нет.
+        if (this.FindControl<ItemsControl>("TabsList") is { } tabs)
+            new ReorderDrag<QuestTabVM>(
+                _ => true,
+                (tab, on) => tab.IsDropTarget = on,
+                () => { foreach (var t in _vm.Tabs) t.IsDropTarget = false; },
+                _vm.MoveTabAsync)
+                .Attach(tabs);
+
         Opened += async (_, _) =>
         {
             await _vm.LoadAsync();

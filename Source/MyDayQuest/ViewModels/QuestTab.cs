@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace MyDayQuest.ViewModels;
 
@@ -26,6 +26,10 @@ public partial class QuestTab : ObservableObject
     /// <summary>Выделена / открыта в среднем поле.</summary>
     [ObservableProperty]
     private bool _isSelected;
+
+    /// <summary>Сюда сейчас метят перетаскиваемой плашкой.</summary>
+    [ObservableProperty]
+    private bool _isDropTarget;
 
     /// <summary>Цвет карточки (пастельный, назначается по кругу).</summary>
     public string ColorHex { get; init; } = "#EDEDED";

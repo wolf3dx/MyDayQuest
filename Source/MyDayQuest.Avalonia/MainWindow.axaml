@@ -170,7 +170,7 @@
         <!-- ЛЕНТА ВКЛАДОК -->
         <Border Grid.Row="3" Background="#1E1710" Height="96" BorderBrush="#D8A22A" BorderThickness="0,1,0,0">
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Padding="20,12">
-                <ItemsControl ItemsSource="{Binding Tabs}">
+                <ItemsControl x:Name="TabsList" ItemsSource="{Binding Tabs}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
@@ -178,6 +178,8 @@
                         <DataTemplate x:DataType="vm:QuestTabVM">
                             <Button Classes="tab" Width="120" Height="60" Margin="-14,0,0,0" Padding="8"
                                     Background="{Binding ColorHex}"
+                                    BorderBrush="{Binding IsDropTarget, Converter={x:Static vm:Conv.DropBrush}}"
+                                    BorderThickness="2"
                                     Command="{Binding ((vm:MainViewModel)DataContext).OpenTabCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                     CommandParameter="{Binding}">
                                 <TextBlock Text="{Binding Name}" Foreground="#2A1F12" FontWeight="Bold"

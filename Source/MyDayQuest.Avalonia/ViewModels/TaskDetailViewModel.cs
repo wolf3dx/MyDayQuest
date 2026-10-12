@@ -28,6 +28,22 @@ public partial class TaskDetailViewModel : ObservableObject
 
     public ObservableCollection<SubtaskRowVM> Subtasks { get; } = new();
 
+    /// <summary>
+    /// Перенести подзадание на место другого. Порядок пишем в базу сразу:
+    /// галочка выполнения сохраняется помимо кнопки «Сохранить», и без записи
+    /// очередь разъехалась бы с тем, что уже лежит в базе.
+    /// </summary>
+    public async Task MoveSubtaskAsync(SubtaskRowVM moved, SubtaskRowVM target)
+    {
+        var from = Subtasks.IndexOf(moved);
+        var to = Subtasks.IndexOf(target);
+        if (from < 0 || to < 0 || from == to) return;
+
+        Subtasks.Move(from, to);
+        await _db.SaveSubtaskOrderAsync(Subtasks.Select(s => s.Id).ToList());
+    }
+
+
     public string ProgressPercentText => $"{Progress} %";
     partial void OnProgressChanged(int v) => OnPropertyChanged(nameof(ProgressPercentText));
 

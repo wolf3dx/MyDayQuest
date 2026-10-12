@@ -130,6 +130,50 @@ public partial class TaskDetailViewModel : ObservableObject
         await _db.RefreshTaskProgressAsync(TaskId);
     }
 
+    // --- Перетаскивание подзаданий ---
+    //
+    // Взятую строку держим полем: на Android до получателя из посылки
+    // перетаскивания доезжает только текст, а нужен сам объект.
+    private SubtaskVM? _dragged;
+
+    [RelayCommand]
+    private void BeginSubtaskDrag(SubtaskVM sub) => _dragged = sub;
+
+    [RelayCommand]
+    private void SubtaskDragOver(SubtaskVM sub)
+    {
+        if (sub is not null && _dragged is not null && !ReferenceEquals(sub, _dragged))
+            sub.IsDropTarget = true;
+    }
+
+    [RelayCommand]
+    private void SubtaskDragLeave(SubtaskVM sub)
+    {
+        if (sub is not null) sub.IsDropTarget = false;
+    }
+
+    /// <summary>
+    /// Положить взятое подзадание на место другого. Порядок пишем в базу сразу:
+    /// галочка выполнения сохраняется помимо кнопки «Принять», и без записи
+    /// очередь разъехалась бы с тем, что уже лежит в базе.
+    /// </summary>
+    [RelayCommand]
+    private async Task DropSubtaskAsync(SubtaskVM target)
+    {
+        var moved = _dragged;
+        _dragged = null;
+        foreach (var s in Subtasks) s.IsDropTarget = false;
+
+        if (moved is null || target is null || ReferenceEquals(moved, target)) return;
+
+        var from = Subtasks.IndexOf(moved);
+        var to = Subtasks.IndexOf(target);
+        if (from < 0 || to < 0) return;
+
+        Subtasks.Move(from, to);
+        await _db.SaveSubtaskOrderAsync([.. Subtasks.Select(s => s.Id)]);
+    }
+
     [RelayCommand]
     private void SelectSubtask(SubtaskVM sub)
     {

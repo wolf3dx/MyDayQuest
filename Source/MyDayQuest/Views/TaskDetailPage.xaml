@@ -72,23 +72,49 @@
                                 <Setter Property="Stroke" Value="{DynamicResource ParchmentEdge}" />
                                 <Setter Property="StrokeThickness" Value="2" />
                             </DataTrigger>
+                            <!-- Строка, на место которой сейчас метят. Идёт последней:
+                                 при совпадении побеждает последний сработавший признак. -->
+                            <DataTrigger TargetType="Border" Binding="{Binding IsDropTarget}" Value="True">
+                                <Setter Property="Stroke" Value="{DynamicResource QuestGreen}" />
+                                <Setter Property="StrokeThickness" Value="3" />
+                            </DataTrigger>
                         </Border.Triggers>
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TaskDetailViewModel}}, Path=SelectSubtaskCommand}"
                                 CommandParameter="{Binding .}" />
+                            <DropGestureRecognizer AllowDrop="True"
+                                DragOverCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:TaskDetailViewModel}}, Path=SubtaskDragOverCommand}"
+                                DragOverCommandParameter="{Binding .}"
+                                DragLeaveCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:TaskDetailViewModel}}, Path=SubtaskDragLeaveCommand}"
+                                DragLeaveCommandParameter="{Binding .}"
+                                DropCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:TaskDetailViewModel}}, Path=DropSubtaskCommand}"
+                                DropCommandParameter="{Binding .}" />
                         </Border.GestureRecognizers>
-                        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <CheckBox Grid.Row="0" Grid.Column="0"
+                        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8">
+                            <!-- Ручка переноса. Тащим именно за неё: долгое нажатие
+                                 на поле ввода — это выделение текста, а не перенос. -->
+                            <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
+                                   Text="≡" FontSize="22"
+                                   TextColor="{DynamicResource QuestInkSoft}"
+                                   WidthRequest="30"
+                                   HorizontalTextAlignment="Center" VerticalOptions="Center">
+                                <Label.GestureRecognizers>
+                                    <DragGestureRecognizer
+                                        DragStartingCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:TaskDetailViewModel}}, Path=BeginSubtaskDragCommand}"
+                                        DragStartingCommandParameter="{Binding .}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                            <CheckBox Grid.Row="0" Grid.Column="1"
                                       IsChecked="{Binding IsDone}"
                                       VerticalOptions="Center" />
-                            <Entry Grid.Row="0" Grid.Column="1" Text="{Binding Title}" Placeholder="Цель задания"
+                            <Entry Grid.Row="0" Grid.Column="2" Text="{Binding Title}" Placeholder="Цель задания"
                                    TextColor="{DynamicResource QuestInk}"
                                    VerticalOptions="Center" />
 
                             <!-- Срок: без галочки дата не учитывается, иначе DatePicker
                                  сделал бы срочным каждое подзадание. -->
-                            <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="6">
+                            <HorizontalStackLayout Grid.Row="1" Grid.Column="2" Spacing="6">
                                 <CheckBox IsChecked="{Binding HasDue}"
                                           Color="{DynamicResource QuestInk}" VerticalOptions="Center" />
                                 <Label Text="к дате" TextColor="{DynamicResource QuestInkSoft}"

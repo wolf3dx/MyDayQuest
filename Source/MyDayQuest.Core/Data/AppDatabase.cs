@@ -94,6 +94,27 @@ public class AppDatabase
         return quest.Id;
     }
 
+    /// <summary>
+    /// Запомнить порядок листов: место в списке становится SortOrder.
+    /// Пишем только то, что сдвинулось, — иначе каждое перетаскивание
+    /// обновляло бы отметку времени у всех листов и мешало слиянию.
+    /// </summary>
+    public async Task SaveQuestOrderAsync(IList<int> idsInOrder)
+    {
+        var db = await GetConnectionAsync();
+        var quests = await db.Table<Quest>().ToListAsync();
+        var changed = new List<Quest>();
+        for (var i = 0; i < idsInOrder.Count; i++)
+        {
+            var q = quests.FirstOrDefault(x => x.Id == idsInOrder[i]);
+            if (q is null || q.SortOrder == i) continue;
+            q.SortOrder = i;
+            q.UpdatedUtc = DateTime.UtcNow;
+            changed.Add(q);
+        }
+        if (changed.Count > 0) await db.UpdateAllAsync(changed);
+    }
+
     public async Task DeleteQuestAsync(int questId)
     {
         var db = await GetConnectionAsync();
@@ -257,6 +278,23 @@ public class AppDatabase
             await db.InsertAsync(subtask);
         else
             await db.UpdateAsync(subtask);
+    }
+
+    /// <summary>Запомнить порядок подзаданий внутри задания.</summary>
+    public async Task SaveSubtaskOrderAsync(IList<int> idsInOrder)
+    {
+        var db = await GetConnectionAsync();
+        var subs = await db.Table<Subtask>().ToListAsync();
+        var changed = new List<Subtask>();
+        for (var i = 0; i < idsInOrder.Count; i++)
+        {
+            var s = subs.FirstOrDefault(x => x.Id == idsInOrder[i]);
+            if (s is null || s.SortOrder == i) continue;
+            s.SortOrder = i;
+            s.UpdatedUtc = DateTime.UtcNow;
+            changed.Add(s);
+        }
+        if (changed.Count > 0) await db.UpdateAllAsync(changed);
     }
 
     public async Task DeleteSubtaskAsync(int subtaskId)

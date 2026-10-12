@@ -15,6 +15,16 @@ public partial class TaskDetailWindow : Window
     {
         AvaloniaXamlLoader.Load(this);
         DataContext = _vm = vm;
+
+        // Тащим только за ручку: нажатие на поле ввода — выделение текста.
+        if (this.FindControl<ItemsControl>("SubtaskList") is { } list)
+            new ReorderDrag<SubtaskRowVM>(
+                c => c.Classes.Contains("grip"),
+                (row, on) => row.IsDropTarget = on,
+                () => { foreach (var s in _vm.Subtasks) s.IsDropTarget = false; },
+                _vm.MoveSubtaskAsync)
+                .Attach(list);
+
         Opened += async (_, _) => await _vm.LoadAsync();
     }
 

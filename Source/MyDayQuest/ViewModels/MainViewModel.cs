@@ -250,6 +250,49 @@ public partial class MainViewModel : ObservableObject
         IsListOpen = true;
     }
 
+    // --- Перетаскивание закладок ---
+    //
+    // Взятую закладку держим полем: на Android до получателя из посылки
+    // перетаскивания доезжает только текст, а нужен сам объект.
+    private QuestTab? _draggedTab;
+
+    [RelayCommand]
+    private void BeginTabDrag(QuestTab tab) => _draggedTab = tab;
+
+    [RelayCommand]
+    private void TabDragOver(QuestTab tab)
+    {
+        if (tab is not null && _draggedTab is not null && !ReferenceEquals(tab, _draggedTab))
+            tab.IsDropTarget = true;
+    }
+
+    [RelayCommand]
+    private void TabDragLeave(QuestTab tab)
+    {
+        if (tab is not null) tab.IsDropTarget = false;
+    }
+
+    /// <summary>
+    /// Положить взятую закладку на место другой. Перетаскивание меняет только
+    /// порядок: что открыто и что выделено, остаётся как было.
+    /// </summary>
+    [RelayCommand]
+    private async Task DropTabAsync(QuestTab target)
+    {
+        var moved = _draggedTab;
+        _draggedTab = null;
+        foreach (var t in Tabs) t.IsDropTarget = false;
+
+        if (moved is null || target is null || ReferenceEquals(moved, target)) return;
+
+        var from = Tabs.IndexOf(moved);
+        var to = Tabs.IndexOf(target);
+        if (from < 0 || to < 0) return;
+
+        Tabs.Move(from, to);
+        await _db.SaveQuestOrderAsync([.. Tabs.Select(t => t.QuestId)]);
+    }
+
     [RelayCommand]
     private void Collapse()
     {

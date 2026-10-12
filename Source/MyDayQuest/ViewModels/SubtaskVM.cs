@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace MyDayQuest.ViewModels;
 
@@ -16,6 +16,10 @@ public partial class SubtaskVM : ObservableObject
     /// <summary>Выделено для удаления кнопкой «–».</summary>
     [ObservableProperty]
     private bool _isSelected;
+
+    /// <summary>Сюда сейчас метят перетаскиваемым подзаданием.</summary>
+    [ObservableProperty]
+    private bool _isDropTarget;
 
     /// <summary>
     /// Срок задан. Отдельный признак нужен потому, что DatePicker не умеет
