@@ -93,7 +93,8 @@ public partial class MainWindow : Window
     // ---- Шапка ----
     private async void OnAbout(object? sender, RoutedEventArgs e)
         => await Dialogs.AlertAsync(this, "О приложении",
-            "My Day Quest (M.D.Q)\n\nПланировщик целей: листы → задания → подзадания, единый дневной план.\n\nАвтор: Виталий Коновалов. Версия 0.1.0.");
+            "My Day Quest (M.D.Q)\n\nПланировщик целей: листы → задания → подзадания, единый дневной план.\n\nАвтор: Виталий Коновалов (v.k.andreevich). Версия "
+            + AppVersion.Display + ".");
 
     private async void OnUpdateClick(object? sender, PointerPressedEventArgs e)
         => await _vm.UpdateAppAsync();

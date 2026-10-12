@@ -15,4 +15,8 @@ public static class AppVersion
             return asm.GetName().Version?.ToString() ?? "0.0";
         }
     }
+
+    /// <summary>Версия для показа человеку: без «+хеш коммита», который
+    /// сборка дописывает к информационной версии.</summary>
+    public static string Display => Current.Split('+')[0];
 }

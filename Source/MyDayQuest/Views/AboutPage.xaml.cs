@@ -5,6 +5,8 @@ public partial class AboutPage : ContentPage
     public AboutPage()
     {
         InitializeComponent();
+        // Версию берём у сборки, чтобы она не расходилась с выпуском.
+        VersionLabel.Text = $"Версия {AppVersion.Display}";
     }
 
     private async void OnSettingsClicked(object? sender, EventArgs e)
